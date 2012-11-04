@@ -1,0 +1,8 @@
+{ "name": "web"
+, "version": "0.1.0"
+, "author": "Mark Nadal"
+, "description": "Awesome web platform for distributed projects."
+, "homepage": "http://github.com/amark/theory"
+, "engines": ["node >= 0.6.6"]
+, "main": "theory"
+}
