@@ -2,7 +2,12 @@
 , "version": "0.1.0"
 , "author": "Mark Nadal"
 , "description": "Awesome web platform for distributed projects."
-, "homepage": "http://github.com/amark/theory"
+, "homepage": "http://github.com/amark/web"
 , "engines": ["node >= 0.6.6"]
+, "dependencies": {
+    "theory": "~>0.2.0",
+    "mime": "~>1.2.4",
+    "sockjs": "~>0.3.1",
+  }
 , "main": "theory"
 }
