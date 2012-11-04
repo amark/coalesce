@@ -1,4 +1,4 @@
-module.exports=require(process.env.totheory)((function(){
+module.exports=require('theory')((function(){
 	var web = {};
 	web.name = 'web';
 	web.version = 1;
@@ -8,28 +8,21 @@ module.exports=require(process.env.totheory)((function(){
 		,'url': 0
 		,'mime': 0
 		,'path': 0
-		//,'redis': 0
 		,'http': 0
 		,'https': 0
 		,'node-static': 0
 		,'child_process': 0
-		//,'mongous':'0.2.3'
-		//,'./spread': 3
 	};
 	web.init = (function(a){
 		var	fs = a.fs
-			//, $ = a.mongous.Mongous,db='theory.state'
 			, path = a.path
 			, URL = a.url
 			, mime = a.mime
-			//, redis = a.redis
 			, ns = a['node-static']
-			//, red = redis.createClient()
 			, spread = a.spread
 			, spawn = a.child_process.spawn
 			, fork = a.child_process.fork;
 		var	sock = require('sockjs')
-			//, Redis = spawn('redis-server')
 			, com
 			, cons = []
 			, E, spread;
