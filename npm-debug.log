@@ -1,0 +1,96 @@
+info it worked if it ends with ok
+verbose cli [ 'node', '/usr/local/bin/npm', 'publish', '.' ]
+info using npm@1.1.21
+info using node@v0.6.6
+verbose config file /home/theory/.npmrc
+verbose config file /usr/local/etc/npmrc
+verbose config file /usr/local/lib/node_modules/npm/npmrc
+verbose publish [ '.' ]
+verbose caching /home/theory/dropbox/Public/OSS/web/package.json
+verbose loadDefaults hivemind@0.1.0
+info prepublish hivemind@0.1.0
+verbose cache add [ '.', null ]
+silly cache add: name, spec, args [ undefined, '.', [ '.', null ] ]
+verbose parsed url { pathname: '.', path: '.', href: '.' }
+verbose caching package.json
+verbose loadDefaults hivemind@0.1.0
+verbose tar.pack [ '/tmp/npm-1352072946366/1352072946365-0.4670787239447236/tmp.tgz',
+verbose tar.pack   '.' ]
+verbose tarball /tmp/npm-1352072946366/1352072946365-0.4670787239447236/tmp.tgz
+verbose folder .
+verbose unpack /tmp/npm-1352072946366/1352072946365-0.4670787239447236/tmp.tgz
+silly gunzTarPerm modes [ '755', '644' ]
+silly extracting entry package.json
+silly modified mode [ 'package.json', 511, 493 ]
+silly extracting entry init.js
+silly modified mode [ 'init.js', 511, 493 ]
+silly extracting entry web.js
+silly modified mode [ 'web.js', 511, 493 ]
+silly extracting entry assemble.sh
+silly modified mode [ 'assemble.sh', 511, 493 ]
+verbose caching /tmp/npm-1352072946366/1352072946365-0.4670787239447236/package/package.json
+verbose loadDefaults hivemind@0.1.0
+verbose from cache /tmp/npm-1352072946366/1352072946365-0.4670787239447236/package/package.json
+verbose tar.pack [ '/home/theory/.npm/hivemind/0.1.0/package.tgz',
+verbose tar.pack   '/tmp/npm-1352072946366/1352072946365-0.4670787239447236/package' ]
+verbose tarball /home/theory/.npm/hivemind/0.1.0/package.tgz
+verbose folder /tmp/npm-1352072946366/1352072946365-0.4670787239447236/package
+verbose unpack /home/theory/.npm/hivemind/0.1.0/package.tgz
+silly gunzTarPerm modes [ '755', '644' ]
+silly extracting entry package.json
+silly extracting entry web.js
+silly extracting entry init.js
+silly extracting entry assemble.sh
+verbose caching /home/theory/.npm/hivemind/0.1.0/package/package.json
+verbose loadDefaults hivemind@0.1.0
+silly updated sha bytes 6612
+info shasum ef950623fbaeeb3c3dc374b7a6f72b4e80f5c2a4
+info shasum /home/theory/.npm/hivemind/0.1.0/package.tgz
+verbose from cache /home/theory/.npm/hivemind/0.1.0/package/package.json
+verbose chmod /home/theory/.npm/hivemind/0.1.0/package.tgz 644
+verbose chown [ '/home/theory/.npm/hivemind/0.1.0/package.tgz', 1000, 1000 ]
+silly publish { name: 'hivemind',
+silly publish   version: '0.1.0',
+silly publish   author: { name: 'Mark Nadal' },
+silly publish   description: 'Awesome web platform for distributed projects.',
+silly publish   homepage: 'http://github.com/amark/web',
+silly publish   engines: [ 'node >= 0.6.6', node: ' >= 0.6.6' ],
+silly publish   dependencies: { theory: '~>0.2.0', mime: '~>1.2.4', sockjs: '~>0.3.1' },
+silly publish   main: 'theory',
+silly publish   _npmUser: { name: 'amark', email: 'mark@accelsor.com' },
+silly publish   _id: 'hivemind@0.1.0',
+silly publish   devDependencies: {},
+silly publish   optionalDependencies: {},
+silly publish   _engineSupported: true,
+silly publish   _npmVersion: '1.1.21',
+silly publish   _nodeVersion: 'v0.6.6',
+silly publish   _defaultsLoaded: true,
+silly publish   dist: 
+silly publish    { shasum: 'ef950623fbaeeb3c3dc374b7a6f72b4e80f5c2a4',
+silly publish      tarball: 'http://registry.npmjs.org/hivemind/-/hivemind-0.1.0.tgz' } }
+verbose raw, before any munging hivemind
+verbose url resolving [ 'https://registry.npmjs.org/', './hivemind' ]
+verbose url resolved https://registry.npmjs.org/hivemind
+http PUT https://registry.npmjs.org/hivemind
+http 409 https://registry.npmjs.org/hivemind
+verbose raw, before any munging hivemind
+verbose url resolving [ 'https://registry.npmjs.org/', './hivemind' ]
+verbose url resolved https://registry.npmjs.org/hivemind
+http GET https://registry.npmjs.org/hivemind
+http 200 https://registry.npmjs.org/hivemind
+info Already published hivemind@0.1.0
+verbose uploading bin dists []
+ERR! publish fail Cannot publish over existing version.
+ERR! publish fail Bump the 'version' field, set the --force flag, or
+ERR! publish fail     npm unpublish 'hivemind@0.1.0'
+ERR! publish fail and try again
+ERR! 
+ERR! System Linux 3.0.0-12-generic
+ERR! command "node" "/usr/local/bin/npm" "publish" "."
+ERR! cwd /home/theory/dropbox/Public/OSS/web
+ERR! node -v v0.6.6
+ERR! npm -v 1.1.21
+ERR! code EPUBLISHCONFLICT
+ERR! message publish fail
+ERR! errno {}
+verbose exit [ 1, true ]
