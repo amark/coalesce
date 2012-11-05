@@ -250,6 +250,8 @@ module.exports=require('theory')((function(){
 				}
 			});
 			w.serve = (function(opt,fn){
+				console.log(opt);
+				console.log(module);
 				opt = a.obj.is(opt)? opt : {};
 				opt.pre = opt.pre||(function(){});
 				opt.post = opt.fn||(function(){});
