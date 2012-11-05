@@ -250,14 +250,14 @@ module.exports=require('theory')((function(){
 				}
 			});
 			w.serve = (function(opt,fn){
-				console.log(opt);
-				console.log(module);
 				opt = a.obj.is(opt)? opt : {};
 				opt.pre = opt.pre||(function(){});
 				opt.post = opt.fn||(function(){});
 				opt.host = opt.host||'localhost';
 				opt.port = opt.port||7777;
-				opt.dir = opt.dir||__dirname;
+				opt.dir = opt.dir ||
+					((module.parent||{}).filename||'').split('/').slice(0,-1).join('/')
+					|| __dirname;
 				if(a.bi.is(opt.sec)){
 				
 				} else if(a.obj.is(opt.sec)){
