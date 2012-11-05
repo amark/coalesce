@@ -33,7 +33,7 @@ module.exports=require('theory')((function(){
 			spread.way = {};
 			spread.create = (function(opt,fn,cb){
 				var way = (a.list(opt.file.split('/')).at(-1)||'').replace(a.text.find.ext,'');
-				if(!(/\.js$/i).test(opt.file) || way == 'theory'){
+				if(!(/\.js$/i).test(opt.file) || way == 'theory' || opt.file === (module.parent||{}).filename){
 					return fn(false);
 				}
 				var ts = a.time.is();
@@ -55,7 +55,7 @@ module.exports=require('theory')((function(){
 					}
 					cb(m,way);
 				});
-				/* TODO: BUG: On first load, JavaScript which can be executed on the server but isn't a Theory module won't trigger a REPLY
+				/* TODO: BUG: On first load, non-Theory modularized JavaScript that can run on the server won't trigger a REPLY
 					Subsequent requests will work just fine. Potential fix: time.wait? */
 				p.on('exit',function(d,e){
 					var cog = a(spread.on,way)||{};
@@ -254,7 +254,7 @@ module.exports=require('theory')((function(){
 				opt.pre = opt.pre||(function(){});
 				opt.post = opt.fn||(function(){});
 				opt.host = opt.host||'localhost';
-				opt.port = opt.port||7777;
+				opt.port = opt.port||80;
 				opt.dir = opt.dir ||
 					((module.parent||{}).filename||'').split('/').slice(0,-1).join('/')
 					|| __dirname;
@@ -286,7 +286,6 @@ module.exports=require('theory')((function(){
 					opt.map = opt.map.sort(opt.flow);
 				}
 				w.opt = opt;
-				//$().open(opt.db.host);
 				com = sock.createServer({
 					sockjs_url: opt.com
 				});
@@ -308,6 +307,9 @@ module.exports=require('theory')((function(){
 					//console.log(req.url);
 					a.fns.flow([
 					function(next){
+						if(!opt.no_global_theory_src && req.url.way === 'theory'){
+							return next(req,res);
+						}
 						spread.create({
 							file: req.url.map
 							,invince: req.url.file != req.url.map
@@ -369,7 +371,7 @@ module.exports=require('theory')((function(){
 						delete cons[con.id];
 					});
 				});
-				com.installHandlers(w.state,{prefix:'/com',log:function(e,m){if(e==='error')console.log(m);}});
+				com.installHandlers(w.state,opt.com||{prefix:'/com'});
 				return w;
 			});
 			if(m){
