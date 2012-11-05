@@ -227,6 +227,7 @@ module.exports=require('theory')((function(){
 						a.obj(a(spread.on,way)).each(function(v,i){
 							low = (v.count < (low||(low=v)).count)? v : low;
 						});
+						console.log(way);
 						a(spread.on,way+'.p'+low.pid+'.com.send->')(m);
 						low.count++;
 						return;
