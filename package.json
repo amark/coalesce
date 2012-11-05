@@ -2,7 +2,7 @@
 , "version": "0.1.2"
 , "author": "Mark Nadal"
 , "description": "Awesome web platform for distributed projects."
-, "homepage": "http://github.com/amark/web"
+, "homepage": "http://github.com/amark/coalesce"
 , "engines": ["node >= 0.6.6"]
 , "dependencies": {
     "theory": "~>0.2.0",
