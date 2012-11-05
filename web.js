@@ -269,9 +269,11 @@ module.exports=require('theory')((function(){
 				opt.cache.age = opt.cache.age||0;
 				opt.db = opt.db||{};
 				opt.db.host = opt.db.host||'localhost';
-				opt.com = "http"+(opt.sec?'s':'')+"://"
+				opt.com = opt.com||{};
+				opt.com.prefix = opt.com.prefix||'/com';
+				opt.com.url = opt.com.url||"http"+((opt.sec.key&&opt.sec.cert)?'s':'')+"://"
 					+opt.host+(opt.port?':'+opt.port:'')
-					+(opt.com||"/node_modules/sockjs/sockjs-0.3.min.js");
+					+(opt.com.path||"/node_modules/sockjs/sockjs-0.3.min.js");
 				if(opt.map){
 					opt.flow = (function(A,B){
 						A = A.flow; B = B.flow;
@@ -287,7 +289,7 @@ module.exports=require('theory')((function(){
 				}
 				w.opt = opt;
 				com = sock.createServer({
-					sockjs_url: opt.com
+					sockjs_url: opt.com.url
 				});
 				w.dir = new ns.Server(opt.dir);
 				if(opt.sec.key && opt.sec.cert){
@@ -371,7 +373,7 @@ module.exports=require('theory')((function(){
 						delete cons[con.id];
 					});
 				});
-				com.installHandlers(w.state,opt.com||{prefix:'/com'});
+				com.installHandlers(w.state,opt.com);
 				return w;
 			});
 			if(m){
