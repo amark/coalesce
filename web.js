@@ -14,7 +14,6 @@ module.exports=require('theory')((function(){
 		,'child_process': 0
 	};
 	web.init = (function(a){
-		console.log(module);
 		var	fs = a.fs
 			, path = a.path
 			, URL = a.url
@@ -311,7 +310,10 @@ module.exports=require('theory')((function(){
 					a.fns.flow([
 					function(next){
 						if(!opt.no_global_theory_src && req.url.way === 'theory'){
-							return next(req,res);
+							res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8' });
+							return res.end(
+								(a.theory_js = a.theory_js||fs.readFileSync(process.env.totheory,'utf8'))
+							, 'utf-8');
 						}
 						spread.create({
 							file: req.url.map
