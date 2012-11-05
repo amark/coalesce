@@ -37,7 +37,7 @@ module.exports=require('theory')((function(){
 					return fn(false);
 				}
 				var ts = a.time.is();
-				if(!(path.existsSync||fs.existsSync)(opt.file)){
+				if(!(fs.existsSync||path.existsSync)(opt.file)){
 					return fn(false);
 				}
 				if(!opt.respawn && a(spread.on,way)){
@@ -124,7 +124,7 @@ module.exports=require('theory')((function(){
 				var r = a.list(m.map).each(function(v,i){
 					if(v.match(m.url)) return v;
 				})||{};
-				return (0 <= r.flow && (path.existsSync||fs.existsSync)(m.url.file))?
+				return (0 <= r.flow && (fs.existsSync||path.existsSync)(m.url.file))?
 					m.url.file : r.file || m.url.file;
 			});
 			w.wayify = (function(m){
