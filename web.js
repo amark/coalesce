@@ -14,6 +14,7 @@ module.exports=require('theory')((function(){
 		,'child_process': 0
 	};
 	web.init = (function(a){
+		console.log(module);
 		var	fs = a.fs
 			, path = a.path
 			, URL = a.url
