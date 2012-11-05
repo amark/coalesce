@@ -1,5 +1,5 @@
 { "name": "hivemind"
-, "version": "0.1.0"
+, "version": "0.1.1"
 , "author": "Mark Nadal"
 , "description": "Awesome web platform for distributed projects."
 , "homepage": "http://github.com/amark/web"
@@ -9,5 +9,5 @@
     "mime": "~>1.2.4",
     "sockjs": "~>0.3.1"
   }
-, "main": "theory"
+, "main": "web"
 }
