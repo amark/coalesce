@@ -1,4 +1,6 @@
-module.exports=require('theory')((function(){
+module.exports=require("./theory")
+
+((function(){
 	var web = {};
 	web.name = 'web';
 	web.version = 1;
@@ -156,7 +158,7 @@ module.exports=require('theory')((function(){
 				})
 				,tryst: (function(req,c){
 					if(w.opt.sec.incognito){
-						return (!req.connection)? true : c; 
+						return (!req.connection)? true : c;
 					}
 					if(!req.connection){
 						c.who.tid = req.tid||c.who.tid;
@@ -260,9 +262,9 @@ module.exports=require('theory')((function(){
 					((module.parent||{}).filename||'').split('/').slice(0,-1).join('/')
 					|| __dirname;
 				if(a.bi.is(opt.sec)){
-				
+
 				} else if(a.obj.is(opt.sec)){
-				
+
 				} else {
 					opt.sec = {relay: false};
 				}
@@ -328,7 +330,7 @@ module.exports=require('theory')((function(){
 						var m = a.com.meta({how:{way:way,web:'state'}});
 						m.what.url = req.url;
 						m.what.headers = req.headers;
-						m.what.cookie = req.cookie;	
+						m.what.cookie = req.cookie;
 						w.reply(m,function(m){
 							if(m){
 								if(a(m,'what.body')){
