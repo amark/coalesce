@@ -1,1 +1,7 @@
-require('coalesce')({port:7777});
+require('./coalesce')({
+	port:7777
+	,sec: {
+		relay: true
+		,incognito: true
+	}
+});

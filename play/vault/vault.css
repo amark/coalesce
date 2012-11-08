@@ -1,0 +1,108 @@
+body {
+	font-family: Lucida Sans Unicode, Tahoma, Geneva, sans-serif;
+	text-shadow: #DDD 1px 1px 10px;
+	color: #333;
+}
+
+form {
+	font-size: 18pt;
+}
+
+input {
+	color: #DDD;
+	background: transparent;
+	text-align: center;
+	font-style: italic;
+	border: 0px none transparent;
+	border-bottom: 1px dashed grey;
+	letter-spacing: .1em;
+	margin: 1%;
+}
+
+textarea {
+	width: 100%;
+	height: 250px;
+	color: #DDD;
+	background: rgba(100%,100%,100%,.25);
+}
+
+button {
+	color: white;
+	background: lime;
+	border: none;
+	margin: 1%;
+	padding: 1.5%;
+	letter-spacing: .1em;
+	box-shadow: inset 0px 0px 50px 10px green;
+}
+#save {
+	position: absolute;
+	right: 0px;
+	bottom: 5px;
+	margin: 0px;
+}
+
+.hide {
+	display: none;
+}
+
+.block {
+	color: #333;
+	float: left;
+	margin: 1%;
+	padding: 2%;
+	background: #EEEEFF;
+	width: 44%;
+	box-shadow: inset #9999FF 0px 0px 17px, #DDD 0px 0px 3px;
+}
+
+.center {
+	margin: 0 auto;
+	text-align: center;
+}
+
+.chapter {
+	color: #999;
+	font-size: 80pt;
+	text-align: left;
+	font-family: sans-serif;
+	line-height: .75em;
+	margin-left: -.7%;
+	float: left;
+}
+
+.summary {
+	color: crimson;
+	font-size: 15pt;
+}
+
+#auth {
+	text-align: center;
+}
+
+.help {
+	font-size: 14pt;
+}
+
+.pulse {
+	text-align: center;
+	font-size: 10pt;
+	padding: .5%;
+	background: red;
+	color: #DDD;
+	text-shadow: #333 1px 1px 10px;
+}
+
+.dark {
+	color: #DDD;
+	text-shadow: #333 1px 1px 10px;
+	clear: both;
+	m-argin: 1% 0;
+	padding: 7% 2.5%;
+	box-shadow: inset 0px 0px 100px 25px #000;
+	background: #111 url(http://subtlepatterns.com/patterns/rebel.png) repeat repeat;
+}
+
+.light {
+	b-ackground: url(http://subtlepatterns.subtlepatterns.netdna-cdn.com/patterns/skelatal_weave.png) repeat repeat;
+}

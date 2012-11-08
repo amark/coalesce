@@ -1,0 +1,61 @@
+body {
+	font-family: Comic Sans MS, Comic Sans MS, cursive;
+}
+h1 {
+	font-family: Lucida Sans Unicode, Tahoma, Geneva, sans-serif;
+}
+.hide {
+	display: none;
+}
+.todo {
+	color: beige;
+}
+input {
+	background: transparent;
+}
+.name {
+	text-transform: capitalize;
+}
+#list {
+	font-size: 18pt;
+}
+#list li {
+	min-width: 230px;
+	list-style-position: outside;
+}
+.check {
+	float: right;
+	font-size: 50px;
+	margin-bottom: -50px;
+	z-index: 1;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.check:hover {
+	cursor: pointer;
+}
+input {
+	font-size: 18pt;
+	padding: 10px;
+	border: 0px none transparent;
+	border-bottom: 1px dashed grey;
+}
+ul input {
+	width: 90%;
+}
+#mock li {
+	list-style-type: none;
+}
+#main {
+	max-width: 800px;
+	margin: 20px auto;
+}
+#auth-is {
+	color: white;
+	font-size: 18pt;
+	padding: 15px;
+	background: green;
+	border: none;
+}

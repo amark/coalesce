@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="./todo.css">
+		<script src="/theory.js">
+			require('./todo')
+		</script>
+	</head>
+	<body>
+		<div id="main">
+			<h1 style="text-align: center;"><span class="name">Your</span> ToDo List</h1>
+			<form id="auth" class="hide auth">
+				<input id="auth-name" placeholder="name">
+				<input id="auth-pw" type="password" placeholder="password">
+				<button id="auth-is">sign in or up</button>
+				<span id="auth-info"></span>
+			</form>
+			<div class="hide authed">
+				<ul id="mock"><li><input id="add" placeholder="add to your list..."></li></ul>
+				<ul id="list" class="authed">
+				</ul>
+			</div>
+		</div>
+	</body>
+</html>

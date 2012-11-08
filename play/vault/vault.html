@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="./normalize.css">
+		<link rel="stylesheet" href="./vault.css">
+		<script src="/theory.js">
+			require('./vault.js');
+		</script>
+	</head>
+	<body>
+		<div id="top">
+			<span class="chapter">
+				DECENTRALIZED
+			</span>
+			<span class="chapter" style="clear:left;">
+				STORAGE
+			</span>
+			<span class='summary' style="margin: 1%;"><br/>
+				experimental*
+			</span>
+			<span class='explain'>
+			Dropbox, Facebook, Google, and others store your private data on their proprietary servers,
+			allowing them to read, sell, and give it to the government without your consent or knowledge.
+			This app experiments with a different, serverless, approach.
+			Your private data is encrypted with an AES cipher, an algorithm capable of securing NSA classified information.
+			Then it is replicated to every browser currently viewing this page, which act as redundant data stores.
+			This creates a fully peer to peer, decentralized data network, of which your browser is participating in right now.
+			</span>
+		</div>
+		<div id="auth" class="dark">
+			<form id="keys" class="center">
+				<input id="name" class="reg" placeholder="Pseudonym">
+				<input id="pass" class="reg" type="password" placeholder="Pass Phrase">
+				<button id="activate">ACTIVATE</button><br/>
+				<div id="help">
+					<span class="help help-reg">
+					To get started, create a public and private key for your data.<br/>
+					This will allow you to unlock any current data and encrypt new data.
+					</span>
+					<small class="help help-name hide">
+					First, you need to create a public username. But warning, since this site never stores any data,
+					it has no way of knowing whether this username already exists. Meaning it is best for your username
+					to be as unique as possible.
+					Ex. "The Kitten Ambassador", "Pheonix Revolutionary"
+					</small>
+					<small class="help help-pass hide">
+					Second, you need to create a passphrase which will be used to encrypt your data.
+					<i>It will never be exposed or transmitted over the web.</i>
+					Remember, this is the master key to unlock your data, so make sure only you can guess it.
+					Ex. "The rain in spain falls mostly on the llama.", "Do or do not, but always be hot."
+					</small>
+				</div>
+			</form>
+			<div id="create" class="hide">
+				<div style="position:relative;">
+					<textarea id="data">
+Click here and replace this with your secret message. Then hit save.
+When you reload this page and activate your encryption authorization, your secret message should reappear - even on another browser or computer.
+If it does not, then there may not currently or previously have been enough data stores online. The more the merrier.
+Every person viewing this site acts as a persistent store for your encrypted data, so you have an incentive to share and tweet out this website.
+Each person that comes online might have a copy of your encrypted data, and it will be updated here in place.
+					</textarea>
+					<button id="save">SAVE</button>
+				</div>
+			</div>
+		</div>
+		<div class="pulse">
+			There <span id="onverb">are</span> currently <span id="online">?</span> decentralized data store<span id="onplur"></span> online. <span id="oninfo"></span>
+		</div>
+		<div id="store">
+			
+		</div>
+	</body>
+</html>

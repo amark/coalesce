@@ -3,16 +3,16 @@ module.exports=require('theory')((function(){
 	web.name = 'web';
 	web.version = 1;
 	web.author = 'Mark';
-	web.dependencies = {
-		'fs': 0
-		,'url': 0
-		,'mime': 0
-		,'path': 0
-		,'http': 0
-		,'https': 0
-		,'node-static': 0
-		,'child_process': 0
-	};
+	web.dependencies = [
+		'fs'
+		,'url'
+		,'mime'
+		,'path'
+		,'http'
+		,'https'
+		,'node-static'
+		,'child_process'
+	];
 	web.init = (function(a){
 		var	fs = a.fs
 			, path = a.path
@@ -31,6 +31,13 @@ module.exports=require('theory')((function(){
 			spread.on = {};
 			spread.res = {};
 			spread.way = {};
+			spread.low = (function(way){
+				var low;
+				a.obj(a(spread.on,way)).each(function(v,i){
+					low = (v.count < (low||(low=v)).count)? v : low;
+				});
+				return low;
+			});
 			spread.create = (function(opt,fn,cb){
 				var way = (a.list(opt.file.split('/')).at(-1)||'').replace(a.text.find.ext,'');
 				if(!(/\.js$/i).test(opt.file) || way == 'theory' || opt.file === (module.parent||{}).filename){
@@ -45,31 +52,31 @@ module.exports=require('theory')((function(){
 					return fn(false);
 				}
 				var p = fork(opt.file), t = a.time.is();
-				(a(spread.on,way)||(spread.on[way]={}))['p'+p.pid] = {com:p,pid:p.pid,start:t,count:0};
+				(spread.on[way]||(spread.on[way]={}))[p.pid] = {com:p,pid:p.pid,start:t,count:0};
 				p.on('message',function(m){
 					m = a.obj.ify(m);
 					if(a(m,'onOpen.readyState')===1){
+						a.time.clear(opt.to);
 						if(m.onOpen.state) (spread.on[way]||{}).state = m.onOpen.state;
 						if(m.onOpen.invincible) (spread.on[way]||{}).invincible = true;
-						return fn(true);
+						return fn(true) && (fn=function(){});
 					}
 					cb(m,way);
 				});
-				/* TODO: BUG: On first load, non-Theory modularized JavaScript that can run on the server won't trigger a REPLY
-					Subsequent requests will work just fine. Potential fix: time.wait? */
 				p.on('exit',function(d,e){
-					var cog = a(spread.on,way)||{};
+					var cog = spread.on[way]||{};
 					if(opt.invincible){
-						delete cog['p'+p.pid];
+						delete cog[p.pid];
 						console.log("respawn: "+d);
 						console.log(way+" survived "+(cog.end - cog.start)/1000+" seconds.");
 						console.log("respawn: "+e);
 						spread.create(opt,(function(){}),cb);
 						return;
 					}
+					a.time.clear(opt.to);
 					fn(false);
 					cog.fatal = true;
-					cog = cog['p'+p.pid];
+					cog = cog[p.pid];
 					if(!cog) return;
 					cog.end = a.time.is();
 					delete cog.com;
@@ -78,6 +85,9 @@ module.exports=require('theory')((function(){
 					console.log(way+" survived "+(cog.end - cog.start)/1000+" seconds.");
 					console.log("exit: "+e);
 				});
+				opt.to = a.time.wait(function(){
+					fn(false);
+				},web.opt.spawn_within||3*1000);
 			});
 			return spread;
 		})();
@@ -189,18 +199,18 @@ module.exports=require('theory')((function(){
 			};
 			w.reply = (function(m,fn){
 				if(fn){
-					spread.res['r'+m.when] = fn;
+					spread.res[m.when] = fn;
 					w.msg(m,m.how.way);
 					return;
 				}
-				if(a(spread.res,'r'+m.when)){
-					a(spread.res,'r'+m.when)(m);
-					delete spread.res['r'+m.when];
+				if(spread.res[m.when]){
+					a(spread.res,m.when+'->')(m);
+					delete spread.res[m.when];
 					return;
 				}
 			});
 			w.sub = (function(m,opt){
-				if(!a(m,'who.cid')) return;
+				if(!a(m,'who.cid') || !a(m,'where.on')) return;
 				var con = cons[m.who.cid];
 				if(!con) return;
 				if(con.where[m.where.on]) return con;
@@ -217,35 +227,28 @@ module.exports=require('theory')((function(){
 					,opt = opt||{};
 				way = a.list(way.split('.')).at(1);
 				if(opt != way){
-					if(a.obj.get(a,way)){
-						//console.log("<--- internal --->");
+					if(a[way]){
 						a(a(m,'how.way')+'->')(m);
 						return;
-					}else if(a(spread.on,way) && !a(spread.on,way+'.fatal')){
-						//console.log("<--- local --->");
-						var low;
-						a.obj(a(spread.on,way)).each(function(v,i){
-							low = (v.count < (low||(low=v)).count)? v : low;
-						});
-						console.log(way);
-						a(spread.on,way+'.p'+low.pid+'.com.send->')(m);
+					}else if(spread.on[way] && !a(spread.on,way+'.fatal')){
+						var low = spread.low(way);
+						(spread.on[way][low.pid]&&spread.on[way][low.pid].com||{send:function(){}}).send(m);
+						// Odd error occurs without the above code structured as is.
 						low.count++;
 						return;
 					}else{
-						//console.log("<--- harvest --->");
 					}
 					if(!w.opt.sec.relay){
 						return;
 					}
 				}
-				if(con = w.sub(m) && m.where.on||m.where.at){
+				if((con = w.sub(m)) && m.where.on||m.where.at){
 					m.where.at = m.where.on||m.where.at;
 					delete m.where.on;
 					E.emit(m.where.at,m);
 					return;
 				}
-				if(con = a(cons,m.who.to||'') && con.writable){
-					//console.log(m);
+				if((con = a(cons,m.who.to||'')) && con.writable){
 					con.write(a.text(m).ify());
 					return;
 				}
