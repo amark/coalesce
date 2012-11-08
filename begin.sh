@@ -16,4 +16,4 @@ if `uname | grep darwin` = true;
 
 then ruby -e "$(curl -fsSkL raw.github.com/mxcl/homebrew/go)"; brew update; brew install openssl dpkg autoconf node mongodb redis redis-tools phantomjs czmq;
 
-node index.js;
+node ./js/index.js;
