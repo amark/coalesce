@@ -1,1 +1,1 @@
-var webjs = "./web";
+var webjs = "./js/web.js/";
