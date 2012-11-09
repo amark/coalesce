@@ -19,7 +19,6 @@ module.exports=require('theory')((function(){
 			, URL = a.url
 			, mime = a.mime
 			, ns = a['node-static']
-			, spread = a.spread
 			, spawn = a.child_process.spawn
 			, fork = a.child_process.fork;
 		var	sock = require('sockjs')
@@ -67,9 +66,7 @@ module.exports=require('theory')((function(){
 					var cog = spread.on[way]||{};
 					if(opt.invincible){
 						delete cog[p.pid];
-						console.log("respawn: "+d);
-						console.log(way+" survived "+(cog.end - cog.start)/1000+" seconds.");
-						console.log("respawn: "+e);
+						console.log("respawn: "+d+" >> "+way+" survived "+(cog.end - cog.start)/1000+" seconds. >> respawn: "+e);
 						spread.create(opt,(function(){}),cb);
 						return;
 					}
@@ -81,9 +78,7 @@ module.exports=require('theory')((function(){
 					cog.end = a.time.is();
 					delete cog.com;
 					cog.com = {send:function(){}};
-					console.log("exit: "+d);
-					console.log(way+" survived "+(cog.end - cog.start)/1000+" seconds.");
-					console.log("exit: "+e);
+					console.log("exit: "+d+" >> "+way+" survived "+(cog.end - cog.start)/1000+" seconds. >> exit: "+e);
 				});
 				opt.to = a.time.wait(function(){
 					fn(false);
@@ -254,14 +249,22 @@ module.exports=require('theory')((function(){
 				}
 			});
 			w.serve = (function(opt,fn){
+				module.reqdir = a.text((module.parent||{}).filename).clip('/',0,-1);
+				if(!opt.no_global_theory_src){
+					a.theory_js = a.theory_js||fs.readFileSync(process.env.totheory,'utf8');
+					if(	(fs.existsSync||path.existsSync)(module.reqdir+'/node_modules') && 
+						!(fs.existsSync||path.existsSync)(module.reqdir+'/node_modules/theory')){
+						fs.symlinkSync(a.text(process.env.totheory).clip('/',0,-1)
+							,module.reqdir+'/node_modules/theory'
+						,'dir');
+					}
+				}
 				opt = a.obj.is(opt)? opt : {};
 				opt.pre = opt.pre||(function(){});
 				opt.post = opt.fn||(function(){});
 				opt.host = opt.host||'localhost';
 				opt.port = opt.port||80;
-				opt.dir = opt.dir ||
-					((module.parent||{}).filename||'').split('/').slice(0,-1).join('/')
-					|| __dirname;
+				opt.dir = opt.dir || module.reqdir || __dirname;
 				if(a.bi.is(opt.sec)){
 				
 				} else if(a.obj.is(opt.sec)){
@@ -274,7 +277,7 @@ module.exports=require('theory')((function(){
 				opt.db = opt.db||{};
 				opt.db.host = opt.db.host||'localhost';
 				opt.com = opt.com||{};
-				opt.com.prefix = opt.com.prefix||'/com';
+				opt.com.prefix = opt.com.prefix||'/com';	
 				opt.com.url = opt.com.url||"http"+((opt.sec.key&&opt.sec.cert)?'s':'')+"://"
 					+opt.host+(opt.port?':'+opt.port:'')
 					+(opt.com.path||"/node_modules/sockjs/sockjs-0.3.min.js");
@@ -315,9 +318,7 @@ module.exports=require('theory')((function(){
 					function(next){
 						if(!opt.no_global_theory_src && req.url.way === 'theory'){
 							res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8' });
-							return res.end(
-								(a.theory_js = a.theory_js||fs.readFileSync(process.env.totheory,'utf8'))
-							, 'utf-8');
+							return res.end(a.theory_js,'utf-8');
 						}
 						spread.create({
 							file: req.url.map
