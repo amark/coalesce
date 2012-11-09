@@ -250,7 +250,6 @@ module.exports=require('theory')((function(){
 			});
 			w.serve = (function(opt,fn){
 				module.reqdir = path.dirname((module.parent||{}).filename);
-				console.log(__dirname);
 				if(!opt.no_global_theory_src){
 					a.theory_js = a.theory_js||fs.readFileSync(process.env.totheory,'utf8');
 					if(	(fs.existsSync||path.existsSync)(module.reqdir+'/node_modules') && 
@@ -272,10 +271,12 @@ module.exports=require('theory')((function(){
 				opt.dir = opt.dir || module.reqdir || __dirname;
 				if(a.bi.is(opt.sec)){
 				
-				} else if(a.obj.is(opt.sec)){
+				} else if(a.num.is(opt.sec)){
+					opt.sec = (opt.sec === -2)? {relay: true, incognito: true} : opt.sec;
+				}else if(a.obj.is(opt.sec)){
 				
 				} else {
-					opt.sec = {relay: false};
+				
 				}
 				opt.cache = opt.cache||{};
 				opt.cache.age = opt.cache.age||0;

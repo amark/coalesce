@@ -5,7 +5,7 @@ Fuses your code into an emergent structure.
 
 As simple as:
 ```
-npm install coalesce && node -e "require('coalesce')({port:7777})"
+npm install coalesce && node -e "require('coalesce')({port:7777, sec: -2})"
 ```
 
 That is it, now you can create infinite new projects, like this one:
@@ -50,7 +50,7 @@ module.exports = require('theory')
 
 });
 ```
-And restart the server with `require('coalesce')({port:7777, sec: {relay: true} })` in the same folder and reload the page into 2 tabs. Typing in the input will synchronize across tabs automatically. Curiosity perked? Check out the two test apps in the playground by simply navigating to them in your browser.
+And restart the server with `require('coalesce')({port:7777, sec: -2})` in the same folder and reload the page into 2 tabs. Typing in the input will synchronize across tabs automatically. Curiosity perked? Check out the two test apps in the playground by simply navigating to them in your browser.
 
 ## Real API Docs Coming Soon ##
 
@@ -64,14 +64,3 @@ Sorry if this doesn't make any sense, but in future docs and talks I'll explain 
 3. Your module can optionally receive the request and provide a response, even though it runs in a separate process, already distributed and in parallel. Same setup for multiple machines when connected.
 4. Your module's primary communication practically runs off of function calls, even if it is across systems or multiple systems. Module to module communication is easy, loosely coupled directly to their functions.
 5. Not opinionated, works whether your code only wants to be RESTful, or only a thick client with sockets, or entirely P2P* being relayed through the server.
-
-*which, quick note: security is enabled by default, and the demos require the server to disable security, and will only work if you run Coalesce with:
-```
-require('coalesce')({
-	port:7777
-	,sec: {
-		relay: true
-		,incognito: true
-	}
-});
-```
