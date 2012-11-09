@@ -23,7 +23,6 @@ That is it, now you can create infinite new projects, like this one:
 	</body>
 </html>
 ```
-Install theory globally `npm install -g theory`
 ###hello.js###
 ```
 module.exports = require('theory')

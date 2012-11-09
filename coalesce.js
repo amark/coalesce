@@ -249,14 +249,19 @@ module.exports=require('theory')((function(){
 				}
 			});
 			w.serve = (function(opt,fn){
-				module.reqdir = a.text((module.parent||{}).filename).clip('/',0,-1);
+				module.reqdir = path.dirname((module.parent||{}).filename);
+				console.log(__dirname);
 				if(!opt.no_global_theory_src){
 					a.theory_js = a.theory_js||fs.readFileSync(process.env.totheory,'utf8');
 					if(	(fs.existsSync||path.existsSync)(module.reqdir+'/node_modules') && 
+						(fs.existsSync||path.existsSync)(__dirname+'/node_modules/theory') &&
 						!(fs.existsSync||path.existsSync)(module.reqdir+'/node_modules/theory')){
-						fs.symlinkSync(a.text(process.env.totheory).clip('/',0,-1)
-							,module.reqdir+'/node_modules/theory'
-						,'dir');
+						fs.mkdirSync('node_modules/theory')
+						fs.writeFileSync('node_modules/theory/index.js'
+							,"module.exports=require('"
+							+path.relative(__dirname+'node_modules/theory/index.js'
+							,process.env.totheory).replace(/\\/ig,'/')
+						+"');");
 					}
 				}
 				opt = a.obj.is(opt)? opt : {};
@@ -310,7 +315,7 @@ module.exports=require('theory')((function(){
 					req.url.file = path.normalize(path.join(opt.dir,req.url.pathname));
 					req.url.type = mime.lookup(req.url.pathname);
 					req.url.map = w.map({map:opt.map,url:req.url});
-					req.url.way = w.wayify(req.url.map);
+					req.url.way = path.basename(req.url.map,'.'+req.url.ext);//w.wayify(req.url.map);
 					req.cookie = w.cookie.tryst(req,w.cookie.parse(req));
 					opt.pre(req,res);
 					//console.log(req.url);
