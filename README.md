@@ -7,6 +7,7 @@ As simple as:
 ```
 npm install coalesce && node -e "require('coalesce')({port:7777})"
 ```
+
 That is it, now you can create infinite new projects, like this one:
 ###hello.html###
 ```
@@ -22,6 +23,7 @@ That is it, now you can create infinite new projects, like this one:
 	</body>
 </html>
 ```
+Install theory globally `npm install -g theory`
 ###hello.js###
 ```
 module.exports = require('theory')
