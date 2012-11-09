@@ -27,17 +27,6 @@ That is it, now you can create infinite new projects, like this one:
 ```
 module.exports = require('theory')
 ('hello', function(a){
-	console.log("Alive on node and the page!");
-});
-```
-Save these two files to the same directory as the install.
-
-Now load <http://localhost:7777/hello.html> and check node's and the page's console.
-
-The magic has only just begun, update hello.js to:
-```
-module.exports = require('theory')
-('hello', function(a){
 
     a.com.send({ what: "World", where: {on: 'magic'} });
 
@@ -50,7 +39,11 @@ module.exports = require('theory')
 
 });
 ```
-And restart the server with `require('coalesce')({port:7777, sec: -2})` in the same folder and reload the page into 2 tabs. Typing in the input will synchronize across tabs automatically. Curiosity perked? Check out the two test apps in the playground by simply navigating to them in your browser.
+Save these two files to the same directory as the install.
+
+Now load <http://localhost:7777/hello.html> in 2 windows, side by side, the inputs will synchronize when you type!
+
+Curiosity perked? Check out the two test apps in the playground by simply navigating to them in your browser.
 
 ## Real API Docs Coming Soon ##
 
