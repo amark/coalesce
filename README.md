@@ -39,21 +39,14 @@ The magic has only just begun, update hello.js to:
 module.exports = require('theory')
 ('hello', function(a){
 
-	a.com.send({
-		what: "World"
-		,where: { on: 'magic' }
-	});
+    a.com.send({ what: "World", where: {on: 'magic'} });
 
-	return (document.hello.to.onkeyup = function(m){
-		if( m.what ){
-			document.hello.to.value = m.what;
-		} else {
-			a.com.send({
-				where: 'magic'
-				,what: document.hello.to.value
-			});
-		}
-	});
+    return (document.hello.to.onkeyup = function(m){
+	
+		m.what? document.hello.to.value = m.what : a.com.send({ 
+		what: 	document.hello.to.value, where: 'magic' });
+		
+    });
 
 });
 ```
