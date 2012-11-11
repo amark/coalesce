@@ -10,7 +10,7 @@ module.exports=require('theory')((function(){
 		,'path'
 		,'http'
 		,'https'
-		,'node-static'
+		,'./node_modules/node-static'
 		,'child_process'
 	];
 	web.init = (function(a){
@@ -25,67 +25,6 @@ module.exports=require('theory')((function(){
 			, com
 			, cons = []
 			, E, spread;
-		spread = (function(m){
-			var spread = {};
-			spread.on = {};
-			spread.res = {};
-			spread.way = {};
-			spread.low = (function(way){
-				var low;
-				a.obj(a(spread.on,way)).each(function(v,i){
-					low = (v.count < (low||(low=v)).count)? v : low;
-				});
-				return low;
-			});
-			spread.create = (function(opt,fn,cb){
-				var way = (a.list(opt.file.split('/')).at(-1)||'').replace(a.text.find.ext,'');
-				if(!(/\.js$/i).test(opt.file) || way == 'theory' || opt.file === (module.parent||{}).filename){
-					return fn(false);
-				}
-				var ts = a.time.is();
-				if(!(fs.existsSync||path.existsSync)(opt.file)){
-					return fn(false);
-				}
-				if(!opt.respawn && a(spread.on,way)){
-					if(a(spread.on,way+'.state')) return fn(true);
-					return fn(false);
-				}
-				var p = fork(opt.file), t = a.time.is();
-				(spread.on[way]||(spread.on[way]={}))[p.pid] = {com:p,pid:p.pid,start:t,count:0};
-				p.on('message',function(m){
-					m = a.obj.ify(m);
-					if(a(m,'onOpen.readyState')===1){
-						a.time.clear(opt.to);
-						if(m.onOpen.state) (spread.on[way]||{}).state = m.onOpen.state;
-						if(m.onOpen.invincible) (spread.on[way]||{}).invincible = true;
-						return fn(true) && (fn=function(){});
-					}
-					cb(m,way);
-				});
-				p.on('exit',function(d,e){
-					var cog = spread.on[way]||{};
-					if(opt.invincible){
-						delete cog[p.pid];
-						console.log("respawn: "+d+" >> "+way+" survived "+(cog.end - cog.start)/1000+" seconds. >> respawn: "+e);
-						spread.create(opt,(function(){}),cb);
-						return;
-					}
-					a.time.clear(opt.to);
-					fn(false);
-					cog.fatal = true;
-					cog = cog[p.pid];
-					if(!cog) return;
-					cog.end = a.time.is();
-					delete cog.com;
-					cog.com = {send:function(){}};
-					console.log("exit: "+d+" >> "+way+" survived "+(cog.end - cog.start)/1000+" seconds. >> exit: "+e);
-				});
-				opt.to = a.time.wait(function(){
-					fn(false);
-				},web.opt.spawn_within||3*1000);
-			});
-			return spread;
-		})();
 		E = (function(e){
 			E.w = E.w||{};
 			E.emit = (function(w,m){
@@ -122,6 +61,95 @@ module.exports=require('theory')((function(){
 			}
 			return E;
 		});E();
+		spread = (function(m){
+			var spread = {};
+			spread.on = {};
+			spread.res = {};
+			spread.way = {};
+			spread.low = (function(way){
+				var low;
+				a.obj(a(spread.on,way+'.cogs')).each(function(v,i){
+					low = (!v.end && v.count < (low||(low=v)).count)? v : low;
+				});
+				return low||{};
+			});
+			spread.track = (function(opt,cb){
+				if(spread.tracked[opt.way||opt.file]) return;
+				fs.watchFile(opt.file,function(c,o){
+					opt.respawn = true;
+					spread.create(opt,(function(p){
+						if(!p) return;
+						a.obj(a(spread.on,opt.way+'.cogs')).each(function(v,i){
+							if(v.pid === p) return;
+							if(v.end){
+								v.com && v.com.kill && v.com.kill();
+								return;
+							}
+							v.end = a.time.is();
+						});
+					}),cb);
+				});
+				spread.tracked[opt.way||opt.file] = true;
+			});spread.tracked = {};
+			spread.create = (function(opt,fn,cb){
+				var way = opt.way = path.basename(opt.file,path.extname(opt.file));
+				if(!(/\.js$/i).test(opt.file) || way == 'theory' || opt.file === (module.parent||{}).filename){
+					return fn(false);
+				}
+				var ts = a.time.is();
+				if(!(fs.existsSync||path.existsSync)(opt.file)){
+					return fn(false);
+				}
+				if(!opt.respawn && spread.on[way]){
+					if(a(spread.on,way+'.meta.state')) return fn(true);
+					return fn(false);
+				}
+				var p = fork(opt.file), t = a.time.is(), cog,
+				gear = (spread.on[way]||(spread.on[way]={meta:{},cogs:{}}));
+				gear.meta.invincible = opt.invincible;
+				cog = gear.cogs[p.pid] = {com:p,pid:p.pid,start:t,count:0};
+				p.on('message',function(m){
+					m = a.obj.ify(m);
+					if(a(m,'onOpen.readyState')===1){
+						a.time.clear(opt.to);
+						a.obj(m.mod).each(function(v,i){
+							gear.meta[i] = v;
+						});
+						spread.track(opt,cb);
+						fn(p.pid||true);
+						fn = function(){};
+						return;
+					}
+					cb(m,way);
+				});
+				p.on('exit',function(d,e){
+					if(cog.end){
+						delete gear.cogs[p.pid];
+						return;
+					}
+					if(gear.meta.invincible){
+						console.log("respawn: "+d+" >> "+way+" survived "+
+							((cog.end=a.time.is()) - cog.start)/1000+" seconds. >> respawn: "+e);
+						delete gear.cogs[p.pid];
+						spread.create(opt,(function(){}),cb);
+						return;
+					}
+					a.time.clear(opt.to);
+					fn(false);
+					fn = function(){};
+					gear.meta.fatal = true;
+					cog.end = a.time.is();
+					delete cog.com;
+					cog.com = {send:function(){}};
+					console.log("exit: "+d+" >> "+way+" survived "+(cog.end - cog.start)/1000+" seconds. >> exit: "+e);
+				});
+				opt.to = a.time.wait(function(){
+					fn(false);
+					fn = function(){};
+				},web.opt.spawn_within||3*1000);
+			});
+			return spread;
+		})();
 		web = theory.web = a.web = (function(m){
 			var w = web;
 			w.map = (function(m){
@@ -211,7 +239,6 @@ module.exports=require('theory')((function(){
 				if(con.where[m.where.on]) return con;
 				con.where[m.where.on] = E.on(m.where.on,function(m){
 					if(!con.writable || con.id == m.who.cid || !cons[con.id]) return;
-					//console.log(m.where.at +" for "+ con.id);
 					con.write(a.text.ify(m));
 				});
 				return con;
@@ -225,10 +252,9 @@ module.exports=require('theory')((function(){
 					if(a[way]){
 						a(a(m,'how.way')+'->')(m);
 						return;
-					}else if(spread.on[way] && !a(spread.on,way+'.fatal')){
+					}else if(spread.on[way] && !a(spread.on,way+'.meta.fatal')){
 						var low = spread.low(way);
-						(spread.on[way][low.pid]&&spread.on[way][low.pid].com||{send:function(){}}).send(m);
-						// Odd error occurs without the above code structured as is.
+						low.com && low.com.send && low.com.send(m);
 						low.count++;
 						return;
 					}else{
@@ -316,7 +342,7 @@ module.exports=require('theory')((function(){
 					req.url.file = path.normalize(path.join(opt.dir,req.url.pathname));
 					req.url.type = mime.lookup(req.url.pathname);
 					req.url.map = w.map({map:opt.map,url:req.url});
-					req.url.way = path.basename(req.url.map,'.'+req.url.ext);//w.wayify(req.url.map);
+					req.url.way = path.basename(req.url.map,'.'+req.url.ext);
 					req.cookie = w.cookie.tryst(req,w.cookie.parse(req));
 					opt.pre(req,res);
 					//console.log(req.url);
@@ -328,9 +354,9 @@ module.exports=require('theory')((function(){
 						}
 						spread.create({
 							file: req.url.map
-							,invince: req.url.file != req.url.map
+							,invincible: req.url.file != req.url.map
 						},function(v){
-							if(v && a(spread.on,v=req.url.way+'.state'))
+							if(v && (v=req.url.way+'.'+a(spread.on,req.url.way+'.meta.state')))
 								return next(req,res,v);
 							next.end(req,res);
 						},w.msg);
