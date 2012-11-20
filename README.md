@@ -1,7 +1,7 @@
 Coalesce
 ========
 
-**Fuses your code into an emergent superstructure.**
+_Fuses your code into an emergent superstructure._
 
 As simple as:
 ```
@@ -65,7 +65,7 @@ module.exports = require('theory')
 
 },['http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js']);
 ```
-Yupe, that is right, you can declare and manage your dependencies all withinside of your javascript!
+Yupe, that is right, you can declare and manage your dependencies all within your javascript!
 
 All you need in your HTML is one script tag that requires your app from inside, as seen above:
 ```
@@ -76,7 +76,7 @@ All you need in your HTML is one script tag that requires your app from inside, 
 Now once your modularized code loads, it won't execute until all of your dependencies are loaded.
 
 This finally makes it easy to manage any type of large project.
-If one of your dependencies is also a module, which has dependencies withinside of it, everything asynchronously cascades.
+If one of your dependencies is also a module, which has dependencies within it, everything asynchronously cascades.
 The Theory library makes sure any Inception style depth level of dependencies is all stacked up properly before your code runs.
 
 Hey, afterall, Cobb's wife Mal lives in the Unconstructed Dream Space, and she is named after me**mAl**locate, which is a nightmare for your memory.
@@ -86,7 +86,7 @@ So you are probably like, hey, that is what Theory does, but what is Coalesce? C
 But it provides more than just a seamless TCP / HTTP / AJAX / Websocket communication layer for your apps, it also automatically distributes and deploys them.
 
 This is kind of a throwback to PHP, but don't worry, in a good way.
-Restart Coalesce with `node -e "require('coalesce')({port:7777})"`, and you run this once and it acts as the master web server.
+Restart Coalesce with `node -e "require('coalesce')({port:7777})"`, you run this once and it acts as the master web server.
 You then create your app - let's overwrite hello.js, again, to this:
 ```
 module.exports = require('theory')
@@ -149,7 +149,7 @@ Remember, elegant complexity is created from the emergence of simplicity. This i
 Before we talk about how to intercept HTTP requests and such, you must understand how the magic behaves.
 Coalesce hates opinionated frameworks, and is as unopinionated as possible. The one catch is how a message is structured.
 Messages are the glue that causes all your apps to work in unison, so they are vital to the core of everything.
-Pardon the cross-displinary worlds, but Coalesce borrows the 'W's of journalism to describe information.
+Pardon the cross-disciplinary worlds, but Coalesce borrows the 'W's of journalism to describe information.
 
 ** Who . What . When . Where . Why . How **
 
@@ -166,9 +166,9 @@ If you cannot accept this one opinion, which enables you to be free from opinion
 - **What** An expandable anything. This is the crux of the data you are actually sending, everything else is just metadata relating to the payload.
 	- Client Examples:
 		- `a.com.send("Hello world!")` expands into and is accessible via `m.what`.
-		- `a.com.send({ foo: 'bar' })` the value of 'bar' is accesible via `m.what.foo`.
+		- `a.com.send({ foo: 'bar' })` the value of 'bar' is accessible via `m.what.foo`.
 		- `a.com.send({ foo: 'bar', who: 'Mark' })` expands into `{ who: {to: 'Mark'}, what: {foo: 'bar'} }`.
-		- `a.com.send({ what: {foo: 'bar'}, who: 'Mark' })` is already expanded.
+		- `a.com.send({ what: {foo: 'bar'}, who: {to: 'Mark'} })` is already expanded.
 - **When** Is a hyper precise millisecond timestamp of when the message was created.
 	- It is 17 digits long, which is 4 digits longer than the normal `new Date().getTime()`.
 	- It is not expandable.
@@ -187,7 +187,7 @@ Despite this, it is strongly recommended and encouraged you write your own helpe
 Not to get too meta, but the Theory library also has helper functions to assist you in writing your own helper functions.
 If this is not already an emphasis enough on how important this is,
 then also note that the entire security of your app is controlled by what information you allow to flow through these APIs you create.
-Because Coalesce is not opinionated, you have to enforce your own validation, sanitization, and app specific authorization.
+Because Coalesce is not opinionated, you have to enforce your own validation, sanitation, and app specific authorization.
 
 Therefore, writing your own abstraction ontop of the communication layer will substantially ease your own development and prevent vulnerabilities.
 
@@ -215,8 +215,10 @@ module.exports = require('theory')
 	}
 }});
 ```
+[ ... to be continued ]
 
 ## Real API Docs Coming Soon ##
+...
 
 ###Random Ramblings...##
 This is just tossing up a quick getting started guide, but it obviously is pretty vague.
