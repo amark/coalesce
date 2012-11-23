@@ -255,7 +255,7 @@ require('coalesce')({
 	]
 });
 ```
-Save this to the same folder, and restart coalesce now with `node init.js`. Some quick points:
+Save this to the same folder, and restart Coalesce now with `node init.js`. Some quick points:
 
 1. Coalesce takes a single parameter which is an options object.
 2. One of the options is a mapping property which simply is an array of mapping objects. They are simple.
@@ -285,8 +285,68 @@ Adding in Redis, you can get this kind of fine grain precision:
 
 If you think about this it pretty much gives you complete control over every possible aspect of any type of app logic, yet it is all within a fairly elegant flow structure. Although you are left with the added complexity of having to manage and handle Redis subscriptions for the clients in the server and making sure everything is atomic, especially in the context of your app being possibly run in parallel processes. Coalesce will not do this for you, because it treads on too many opinions, however helper modules for this may be released in the future to ease managing this for you - then you just include the corresponding module which matches whatever particular assumption you need for that specific app.
 
-## Real API Docs Coming Soon ##
-...
+## API ##
+
+### Config Options ###
+
+- `host` the hostname you want for the server. *`'localhost'`*
+- `port` the port which you want the server to listen on. *`80`*
+- `dir` the root directory for the server. *(defaults to the directory of file requiring coalesce)*
+- `pre` a function which gets called prior to trickling down the flow of the maps, if any. Good for any global request monitoring, like `console.log`ing the `req.url` for debugging purposes. *`function(req,res){ }`*
+- `post` a function which gets called after the response is sent. *`function(req,res){ }`*
+- `sec` the security options object.
+    - `relay` allows messages to pass through the server to other clients automatically if there is no matching module to route to. *`false`*
+    - `incognito` no session cookie tracking (tryst), equivalent to a browser's incognito mode, except for the server. `m.who.tid` will no longer be available. *`false`*
+    - `key` same as https.createServer's key option, such as the contents of a key.pem file. *`''`*
+    - `cert` same as https.createServer's cert option, such as the contents of a cert.pem file. *`''`*
+    - rather than declaring `sec` as an object, you can set its value to one of the following **shorthands**:
+    - `-2` == `{relay: true, incognito: true}`
+- `map` an array of map objects, each object should have the following properties:
+    - `flow` the priority weight of the map, the ordering they are sorted. The request flows down from earlier numbers, to `0`, which is the static file server, to later numbers. *`0`*
+    - `match` a function with the URL object of the request, used to filter and determine a match. Return `true` to indicate whether you want the request to be intercepted. *`function(url){ }`*
+    - `file` the path to the Coalesce compatible module you want to map the request to. *`''`*
+- `com` the SockJS config options object, see SockJS's docs.
+
+** miscellaneous:**
+
+- `no_global_theory_src` prevents auto linking and caching Theory for global server side reference as well as client side HTML reference. *`false`*
+- `spawn_within` the millisecond timeout of how long a request should wait for a module to auto deploy itself and intercept the request before Coalesce hands it to the static server. *`3000`*
+
+Example:
+```
+var Coalesce = require('coalesce')
+	,opt = {};
+
+opt.port = 7777;
+opt.sec = { relay: true };
+opt.pre = function(req,res){
+	console.log(req.url);
+}
+opt.spawn_within = 5*1000;
+opt.com = {
+	log: function(level, m){
+		if(level === 'error') 
+			console.log(m);
+	}
+}
+
+Coalesce(opt);
+
+console.log("Coalesce @ "+ opt.port);
+```
+
+### Module Options ###
+
+- `state` the path, in dot notation, to the function in your module which will intercept HTTP requests. *`''`*
+- `invincible` a boolean as to whether you want this module to respawn server side, in case it crashes. *`false`*
+
+Example:
+>scroll up to see the example in the HTTP intercept section.
+
+### Messages ###
+>scroll up to see Messages section.
+
+[ to be continued ... ]
 
 ###Random Ramblings...##
 This is just tossing up a quick getting started guide, but it obviously is pretty vague.
