@@ -291,18 +291,18 @@ module.exports=require('theory')((function(){
 				}
 				opt = a.obj.is(opt)? opt : {};
 				opt.pre = opt.pre||(function(){});
-				opt.post = opt.fn||(function(){});
+				opt.post = opt.post||(function(){});
 				opt.host = opt.host||'localhost';
 				opt.port = opt.port||80;
 				opt.dir = opt.dir || module.reqdir || __dirname;
 				if(a.bi.is(opt.sec)){
-				
+					opt.sec = {};
 				} else if(a.num.is(opt.sec)){
 					opt.sec = (opt.sec === -2)? {relay: true, incognito: true} : opt.sec;
 				}else if(a.obj.is(opt.sec)){
 				
 				} else {
-				
+					opt.sec = {};
 				}
 				opt.cache = opt.cache||{};
 				opt.cache.age = opt.cache.age||0;
@@ -342,10 +342,10 @@ module.exports=require('theory')((function(){
 					req.url.file = path.normalize(path.join(opt.dir,req.url.pathname));
 					req.url.type = mime.lookup(req.url.pathname);
 					req.url.map = w.map({map:opt.map,url:req.url});
-					req.url.way = path.basename(req.url.map,'.'+req.url.ext);
+					req.url.way = path.basename(req.url.map,path.extname(req.url.map));
 					req.cookie = w.cookie.tryst(req,w.cookie.parse(req));
 					opt.pre(req,res);
-					//console.log(req.url);
+					console.log(req.url);
 					a.fns.flow([
 					function(next){
 						if(!opt.no_global_theory_src && req.url.way === 'theory'){
@@ -373,6 +373,9 @@ module.exports=require('theory')((function(){
 											,chs = mime.charsets.lookup(type);
 										res.setHeader('Content-Type', type + (chs ? '; charset=' + chs : ''));
 									}
+									if(m.what.encoding){
+										res.setHeader('Content-Encoding', m.what.encoding);
+									}
 									if(m.what.cookie){ // on login, pragma to no-cache
 										w.cookie.set(res,m.what.cookie);
 									}
@@ -380,7 +383,7 @@ module.exports=require('theory')((function(){
 									opt.post(req,res);
 									return;
 								}
-								req.url.pathname = m.what.pathname||req.url.pathname;
+								req.url.pathname = m.what.pathname||m.what.url.pathname||req.url.pathname;
 							}
 							next(req,res);
 						});

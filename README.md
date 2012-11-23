@@ -82,7 +82,8 @@ The Theory library makes sure any Inception style depth level of dependencies is
 Hey, afterall, Cobb's wife Mal lives in the Unconstructed Dream Space, and she is named after me**mAl**locate, which is a nightmare for your memory.
 (if you didn't laugh... ignore this ever happened)
 
-So you are probably like, hey, that is what Theory does, but what is Coalesce? Coalesce is the web that connects all of your modules, both Node and in the browser.
+So you are probably like, hey, that is what Theory does, but what is Coalesce? 
+>Coalesce is the web that connects all of your modules, both Node and in the browser.
 But it provides more than just a seamless TCP / HTTP / AJAX / Websocket communication layer for your apps, it also automatically distributes and deploys them.
 
 This is kind of a throwback to PHP, but don't worry, in a good way.
@@ -206,16 +207,83 @@ module.exports = require('theory')
 , invincible: true
 , init: (function(a){
 	return {
-		http: (function(m){
-			a.fs.writeFileSync('./lastReq.txt', "The last request was for "+m.what.url.param.name);
+		http: (function(m){ 
+			// HTTP Intercept:
 			console.log(m);
-			m.what.body = "alert('Hello '+"+m.what.url.param.name||'World!'+")";
+			a.fs.writeFileSync('./lastReq.js', "alert('The last request was at "+Date()+"')");
+			m.what.body = "alert('Hello World!')";
 			a.com.reply(m);
 		})
 	}
-}});
+})});
 ```
-[ ... to be continued ]
+Now refresh the page, we should get an ugly ol'alert message. What we are learning...
+
+1. Rather than parameters of name, initializing function, and optional dependencies - we can just have a single parameter that is similar to a package.json file.
+2. This also allows you to wrap it inside another self calling closure that returns an object, if you would like. This is the style seen in the examples, but not demonstrated here.
+3. The `state` property tells Coalesce where your module will intercept HTTP requests. In this case, we want to receive it in the 'http' function of our exported module.
+4. Because Coalesce will assume a script is client side only if it crashes, we activate the `invincible` tag to tell Coalesce to respawn this module server side if it does crash.
+5. As the console will show, we have access to the request `m.what.url`, `m.what.headers`, and `m.what.cookies`.
+6. In the same way the communication module is available via `a.com`, our dependencies are available, so we can easily use the filesystem module via `a.fs`. A dependency of `['./subdir/module-name']` is accessible via `a['module-name']`.
+7. We can modify the response, by setting a `m.what.body`, `m.what.type`, and so on.
+8. `a.com.reply` is a helper that accepts the message passed into the function, which you modify directly, and sends it back to whatever had sent it. It is used by Coalesce for HTTP replies, and by `a.com.ask` client side.
+9. You should never write code with alert messages, writing useless data directly to the filesystem on every request, and inline javascript code. Iuck, do as I say, not as I do.
+
+So let's fiddle with the http function by overwriting it with this:
+```
+			// HTTP Intercept:
+			console.log(m);
+			m.what.pathname = '/lastReq.js';
+			m.what.type = 'js';
+			a.com.reply(m);
+```
+Refresh and bam. It delivered the file we created previously by changing the route of the pathname.
+
+This is interesting, though, because a lot of times we don't want our REST endpoint to be at some ugly path to filename, let alone then only be used to redirect to some other filename. We want the opposite, we want some pretty (extensionless) endpoint name which maps request(s) to our process. That way we could do things like `/hello` or `/hello/user/mark` or `/hello?name=mark`. Not all apps are like this, and therefore Coalesce should not force this, nor should it prevent it.
+
+In order to configure this, we can't dynamically wait for our app to automatically be deployed - this is the sort of thing that has to be hard configured, Coalesce has to filter these against every request in the same way it checks and remembers modules and files. In essence, since these routes are permanent, they have to be explicitly given to Coalesce. This means we need to finally write an actual init script for Coalesce, rather than running it from the command line.
+
+**init.js**
+```
+require('coalesce')({
+	port: 7777
+	,map: [
+		{flow: -1
+		,match: function(url){
+			if(!url.ext) return true;
+		},file: __dirname+'/hello.js'}
+	]
+});
+```
+Save this to the same folder, and restart coalesce now with `node init.js`. Some quick points:
+
+1. Coalesce takes a single parameter which is an options object.
+2. One of the options is a mapping property which simply is an array of mapping objects. They are simple.
+3. Flow controls the priority or weight or ordering of your route. The static file server is at `0`, so negative numbers allow you to catch and respond to a request before the file on disk is sent - thus blocking or overwriting it, if you want, for security purposes. Positive numbers will only be received if the file doesn't already exist.
+4. Match is pretty much self descriptive. It is a function which receives the URL object from the request. Returning `true` indicates you want to intercept the request. In this case, we intercept every request which has no extension. Matching functions should be as light weight as possible.
+5. File is the path to the file the request is to be mapped to and intercepted by. It is assumed to be a module that is compatible with Coalesce and have a request `state`. This file will automatically receive the `invincible` attribute, so it is not necessary to always declare it in the module.
+
+Alright, now let's update our hello.js file again:
+```
+            // HTTP Intercept:
+            console.log(m.what.url);
+			m.what.body = "Hello, "+ (m.what.url.query.name || 'World') +"!";
+            a.com.reply(m);
+```
+Awesome sauce, hit up <http://localhost:7777/asdf?name=Mark> and look what it says! Now try playing around with it yourself. That's all for now on this topic, folks.
+
+## Intercepting Sockets ##
+This is done by default, upon `a.com.send` and mapped directly to your main module function. You can also communicate to other modules, via `a.com('yourOtherModule').send`, which will always pass through the server side module first. Once received, you then decide if you want to `a.com.reply` back to the client, or `m.where` client side you want to `a.com.send` it out to. Server to browser communication can only be emitted from and to the same module, unless you enable the `relay` property in the security options on your Coalesce initialization - but warning, this is a security vulnerability. This relay option was necessary for the examples to work.
+
+Despite this flexibility of intricacy, it is going to be highly recommended that you use Redis' pubsub anyways inside of your module, because it gives you an extra layer of control over the flow points of your app. Consider this comparison, by default Coalesce provides:
+
+1. Client emit --> 2. Server receive, sanitize, validate, process. Emit --> to another module 3. process, then Server emit --> 4. Client(s) receive.
+
+Adding in Redis, you can get this kind of fine grain precision:
+
+1. Client emit --> 2. Server receive, sanitize, validate, process in the context of the sender. Publish to recipients --> 3. Server receives, processes in the context of recipient, then Server emits --> each 4. Client receives.
+
+If you think about this it pretty much gives you complete control over every possible aspect of any type of app logic, yet it is all within a fairly elegant flow structure. Although you are left with the added complexity of having to manage and handle Redis subscriptions for the clients in the server and making sure everything is atomic, especially in the context of your app being possibly run in parallel processes. Coalesce will not do this for you, because it treads on too many opinions, however helper modules for this may be released in the future to ease managing this for you - then you just include the corresponding module which matches whatever particular assumption you need for that specific app.
 
 ## Real API Docs Coming Soon ##
 ...
