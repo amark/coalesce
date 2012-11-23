@@ -307,7 +307,7 @@ If you think about this it pretty much gives you complete control over every pos
     - `file` the path to the Coalesce compatible module you want to map the request to. *`''`*
 - `com` the SockJS config options object, see SockJS's docs.
 
-** miscellaneous:**
+**miscellaneous:**
 
 - `no_global_theory_src` prevents auto linking and caching Theory for global server side reference as well as client side HTML reference. *`false`*
 - `spawn_within` the millisecond timeout of how long a request should wait for a module to auto deploy itself and intercept the request before Coalesce hands it to the static server. *`3000`*
@@ -345,8 +345,6 @@ Example:
 
 ### Messages ###
 >scroll up to see Messages section.
-
-[ to be continued ... ]
 
 ###Random Ramblings...##
 This is just tossing up a quick getting started guide, but it obviously is pretty vague.
