@@ -152,7 +152,7 @@ Coalesce hates opinionated frameworks, and is as unopinionated as possible. The 
 Messages are the glue that causes all your apps to work in unison, so they are vital to the core of everything.
 Pardon the cross-disciplinary worlds, but Coalesce borrows the 'W's of journalism to describe information.
 
-** Who . What . When . Where . Why . How **
+**Who . What . When . Where . Why . How**
 
 These little goodies are what produce the powerful flexibility of Coalesce, and therefore are required for the magic to happen.
 If you cannot accept this one opinion, which enables you to be free from opinions everywhere else, then Coalesce is not for you.
