@@ -338,6 +338,13 @@ console.log("Coalesce @ "+ opt.port);
 ### Module Options ###
 
 - `state` the path, in dot notation, to the function in your module which will intercept HTTP requests. *`''`*
+    - `m.what.headers` are the default headers from the request.
+    - `m.what.url` is an object concerning the URL, with the
+    - `m.what.cookie` is the cookie object from the request. To set your own cookie, just add a property, like `m.what.cookie.name = 'val'`. The '$' prefix symbol allows you to add options to your cookie, like `m.what.cookie.$name = {httpOnly: true, 'Max-Age': 99999}`. Once set, just `a.com.reply(m)` as usual, and the cookies will parsed and added for you.
+    - `m.what.body` assign anything to this, and it will become the body of the response.
+    - `m.what.type` allows you to set the Content-Type.
+    - `m.what.encoding` to set the Content-Encoding.
+    - `m.what.pathname` shorthand for `m.what.url.pathname` useful for redirects.
 - `invincible` a boolean as to whether you want this module to respawn server side, in case it crashes. *`false`*
 
 Example:
@@ -346,7 +353,7 @@ Example:
 ### Messages ###
 >scroll up to see Messages section.
 
-###Random Ramblings...##
+##Random Ramblings...##
 This is just tossing up a quick getting started guide, but it obviously is pretty vague.
 So I'll just explain as much as I can really quickly in a garbled mess.
 Programming is just 9 primitives - booleans, numbers, strings, texts, arrays, objects combined with loops, functions, and if statements.
