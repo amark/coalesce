@@ -285,10 +285,10 @@ module.exports=require('theory')((function(){
 					if(	(fs.existsSync||path.existsSync)(module.reqdir+'/node_modules') && 
 						(fs.existsSync||path.existsSync)(__dirname+'/node_modules/theory') &&
 						!(fs.existsSync||path.existsSync)(module.reqdir+'/node_modules/theory')){
-						fs.mkdirSync('node_modules/theory')
-						fs.writeFileSync('node_modules/theory/index.js'
+						fs.mkdirSync(module.reqdir+'/node_modules/theory')
+						fs.writeFileSync(module.reqdir+'/node_modules/theory/index.js'
 							,"module.exports=require('"
-							+path.relative(__dirname+'node_modules/theory/index.js'
+							+path.relative(module.reqdir+'/node_modules/theory'
 							,process.env.totheory).replace(/\\/ig,'/')
 						+"');");
 					}
