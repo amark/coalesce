@@ -6,7 +6,7 @@
 , "engines": ["node >= 0.6.6"]
 , "dependencies": {
     "theory": "~>0.2.0",
-    "node-static": "~>0.6.0",
+    "node-static": "0.6.0",
     "sockjs": "~>0.3.1",
     "mime": "~>1.2.4"
   }
