@@ -339,8 +339,8 @@ console.log("Coalesce @ "+ opt.port);
 
 - `state` the path, in dot notation, to the function in your module which will intercept HTTP requests. *`''`*
     - `m.what.headers` are the default headers from the request.
-    - `m.what.url` is an object concerning the URL, with the
-    - `m.what.cookie` is the cookie object from the request. To set your own cookie, just add a property, like `m.what.cookie.name = 'val'`. The '$' prefix symbol allows you to add options to your cookie, like `m.what.cookie.$name = {httpOnly: true, 'Max-Age': 99999}`. Once set, just `a.com.reply(m)` as usual, and the cookies will parsed and added for you.
+    - `m.what.url` is an object concerning the URL.
+    - `m.what.cookie` is the cookie object from the request. To set your own cookie, just add a property, like `m.what.cookie.name = 'val'`. The '$' prefix symbol allows you to add options to your cookie, like `m.what.cookie.$name = {httpOnly: true, 'Max-Age': 99999}`.
     - `m.what.body` assign anything to this, and it will become the body of the response.
     - `m.what.type` allows you to set the Content-Type.
     - `m.what.encoding` to set the Content-Encoding.
