@@ -232,10 +232,15 @@ module.exports=require('theory')((function(){
 					return;
 				}
 			});
-			w.sub = (function(m,opt){
-				if(!a(m,'who.cid') || !a(m,'where.on')) return;
-				var con = cons[m.who.cid];
-				if(!con) return;
+			w.sub = (function(m,opt,con){
+				if(	!a.obj.is(m) || !a.obj.is(m.where) ||
+					!a(m,'who.cid') || !(con = cons[m.who.cid])) return;
+				if(m.where.off){
+					if(!con.where[m.where.off]) return;
+					E.off(con.where[m.where.off]);
+					delete con.where[m.where.off];
+					return con;
+				}
 				if(con.where[m.where.on]) return con;
 				con.where[m.where.on] = E.on(m.where.on,function(m){
 					if(!con.writable || con.id == m.who.cid || !cons[con.id]) return;
@@ -243,7 +248,7 @@ module.exports=require('theory')((function(){
 				});
 				return con;
 			});
-			w.msg = (function(m,opt){
+			w.msg = (function(m,opt,con){
 				if(!a.obj.is(m)) return;
 				var way = a(m,'how.way')||a(m,'way')||''
 					,opt = opt||{};
@@ -263,15 +268,14 @@ module.exports=require('theory')((function(){
 						return;
 					}
 				}
-				if((con = w.sub(m)) && m.where.on||m.where.at){
-					m.where.at = m.where.on||m.where.at;
+				if((con = w.sub(m)) && (m.where.on||m.where.off||m.where.at)){
+					m.where.at = m.where.on||m.where.off||m.where.at;
 					delete m.where.on;
-					E.emit(m.where.at,m);
-					return;
+					delete m.where.off;
+					return E.emit(m.where.at,m);
 				}
 				if((con = a(cons,m.who.to||'')) && con.writable){
-					con.write(a.text(m).ify());
-					return;
+					return con.write(a.text(m).ify());
 				}
 			});
 			w.serve = (function(opt,fn){
@@ -345,7 +349,7 @@ module.exports=require('theory')((function(){
 					req.url.way = path.basename(req.url.map,path.extname(req.url.map));
 					req.cookie = w.cookie.tryst(req,w.cookie.parse(req));
 					opt.pre(req,res);
-					console.log(req.url);
+					//console.log(req.url);
 					a.fns.flow([
 					function(next){
 						if(!opt.no_global_theory_src && req.url.way === 'theory'){

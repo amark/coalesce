@@ -175,7 +175,8 @@ If you cannot accept this one opinion, which enables you to be free from opinion
 	- It is not expandable.
 - **Where** Is an expandable object pertaining to pub/sub and where the message has been processed.
 	- `{where: 'magic'}` expands into `{where: {at: 'magic'}}` which broadcasts the message to subscribers of the 'magic' channel.
-	- `{where: {on: magic'}}` subscribes and broadcasts to the 'magic' channel. Note: The above option does not auto-subscribe.
+	- `{where: {on: 'magic'}}` subscribes and broadcasts to the 'magic' channel.
+	- `{where: {off: 'magic'}}` broadcasts and unsubscribes to the 'magic' channel.
 - **Why** Is not used, but can be optionally added if you want to provide an arbitrary comment about why the message was sent.
 - **How** Mandatory Metadata Object.
 	- `m.how.way` holds the magical key which routes which way the object goes, by default is the name of the module.
