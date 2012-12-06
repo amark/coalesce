@@ -6,19 +6,17 @@ module.exports=require('theory')((function(){
 	web.dependencies = [
 		'fs'
 		,'url'
-		,'mime'
 		,'path'
 		,'http'
 		,'https'
-		,'./node_modules/node-static'
 		,'child_process'
 	];
 	web.init = (function(a){
 		var	fs = a.fs
 			, path = a.path
 			, URL = a.url
-			, mime = a.mime
-			, ns = a['node-static']
+			, mime = require('mime')
+			, ns = require('node-static')
 			, spawn = a.child_process.spawn
 			, fork = a.child_process.fork;
 		var	sock = require('sockjs')

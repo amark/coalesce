@@ -264,7 +264,7 @@ Save this to the same folder, and restart Coalesce now with `node init.js`. Some
 4. Match is pretty much self descriptive. It is a function which receives the URL object from the request. Returning `true` indicates you want to intercept the request. In this case, we intercept every request which has no extension. Matching functions should be as light weight as possible.
 5. File is the path to the file the request is to be mapped to and intercepted by. It is assumed to be a module that is compatible with Coalesce and have a request `state`. This file will automatically receive the `invincible` attribute, so it is not necessary to always declare it in the module.
 
-Alright, now let's update our hello.js file again:
+Alright, now let's update the http function of our hello.js file again:
 ```
             // HTTP Intercept:
             console.log(m.what.url);
