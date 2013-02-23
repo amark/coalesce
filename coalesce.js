@@ -369,6 +369,7 @@ module.exports=require('theory')((function(){
 				}
 				opt.run = opt.run||[];
 				w.opt = opt;
+				/*
 				a.list(opt.run).each(function(v,i){
 					console.log(v);
 					spread.create({
@@ -377,7 +378,7 @@ module.exports=require('theory')((function(){
 						},function(v){
 							console.log("? "+v);
 					},w.msg);
-				});
+				});*/
 				com = sock.createServer({
 					sockjs_url: opt.com.url
 				});
