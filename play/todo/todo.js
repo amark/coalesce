@@ -101,7 +101,8 @@ module.exports=require('theory')((function(){
 		}
 		todo = (function(m){
 			var to = todo, name = '', data, get = (function(m){
-				name = a(tryst,m.who.tid||m.what.tid||m.who.cid)||'';
+				name = a(tryst,m.who.tid||m.what.tid||m.who.cid||m.who.to||'')||'';
+				console.log("name: "+name);
 				return a(db,name)||{};
 			});
 			to.sync = (function(m){
@@ -140,7 +141,8 @@ module.exports=require('theory')((function(){
 				console.log('todo.auth');
 				data = get(m);
 				if(m.what.name){
-					m.what.name = a.text.ify(m.what.name);
+					m.what.name = a.text.is(m.what.name)? 
+						m.what.name : a.text.ify(m.what.name);
 					name = a.text.low(m.what.name);
 					if(m.what.pw){
 						var data;
