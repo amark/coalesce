@@ -188,7 +188,7 @@ module.exports=require('theory')((function(){
 					res.setHeader('Set-Cookie', c);
 				})
 				,tid: (function(req,m,fn){
-					if(fn){ 
+					if(fn){
 						if(req.sid || req.tid){
 							m.who.tid = req.tid;
 							m.who.sid = req.sid;
@@ -198,7 +198,7 @@ module.exports=require('theory')((function(){
 							
 							var s, t = a.time.is();
 							if(s = w.tryst[m.who.tid]){
-								req.tid = m.who.tid;
+								cons[req.tid = m.who.tid] = req;
 								req.sid = m.who.sid = s.sid;
 								fn(true);
 							} else {
@@ -266,16 +266,15 @@ module.exports=require('theory')((function(){
 			});
 			w.sub = (function(m,opt,con){
 				if(	!a.obj.is(m) || !a.obj.is(m.where) ||
-					!a(m,'who.cid') || !(con = cons[m.who.cid])) return;
+					!a(m,'who.tid') || !(con = cons[m.who.tid])) return;
 				if(m.where.off){
 					if(!con.where[m.where.off]) return;
 					E.off(con.where[m.where.off]);
 					delete con.where[m.where.off];
 					return con;
-				}
-				if(con.where[m.where.on]) return con;
+				} if(con.where[m.where.on]) return con;
 				con.where[m.where.on] = E.on(m.where.on,function(m){
-					if(!con.writable || con.id == m.who.cid || !cons[con.id]) return;
+					if(!con.writable || con.tid == m.who.tid || !cons[con.id]) return;
 					con.write(a.text.ify(m));
 				});
 				return con;
@@ -471,7 +470,6 @@ module.exports=require('theory')((function(){
 						m = a.com.meta(a.obj.ify(m),con);
 						w.cookie.tid(con,m,function(v){
 							if(!v){ return }
-							//m.who.cid = con.id||m.who.cid;
 							//if(!w.cookie.tryst(con,m)) return;
 							m.where.pid = (m.where.pid == process.pid)? 0 : m.where.pid;
 							w.msg(m);

@@ -159,11 +159,11 @@ If you cannot accept this one opinion, which enables you to be free from opinion
 
 - **Who** An expandable object containing data relating to the recipient and the sender.
 	- `{who: 'Mark'}` expands into `{who: { to: 'Mark' }}` which indicates the message is to be sent to Mark.
-	- In Node, `m.who.cid` is the connection ID of the websocket that sent the message.
-	- In Node, `m.who.tid` is the session ID (tryst) from the original HTTP request. (Unless security is disabled)
+	- In Node, `m.who.tid` is the ID of the specific tab that sent the socket message.
+	- In Node, `m.who.sid` is the session ID from the original HTTP request.
 	- Server Examples:
-		- `a.com.send({ what: "This is sent back to the same tab which sent me this message.", who: m.who.cid })`
-		- `a.com.send({ what: "I will be sent to every tab that is in this session.", who: m.who.tid })`
+		- `a.com.send({ what: "This is sent back to the same tab which sent me this message.", who: m.who.tid })`
+		- `a.com.send({ what: "I will be sent to every tab that is in this session.", who: m.who.sid })`
 - **What** An expandable anything. This is the crux of the data you are actually sending, everything else is just metadata relating to the payload.
 	- Client Examples:
 		- `a.com.send("Hello world!")` expands into and is accessible via `m.what`.
@@ -297,7 +297,7 @@ If you think about this it pretty much gives you complete control over every pos
 - `post` a function which gets called after the response is sent. *`function(req,res){ }`*
 - `sec` the security options object.
     - `relay` allows messages to pass through the server to other clients automatically if there is no matching module to route to. *`false`*
-    - `incognito` no session cookie tracking (tryst), equivalent to a browser's incognito mode, except for the server. `m.who.tid` will no longer be available. *`false`*
+    - `incognito` no session cookie tracking, equivalent to a browser's incognito mode, except for the server. *`false`*
     - `key` same as https.createServer's key option, such as the contents of a key.pem file. *`''`*
     - `cert` same as https.createServer's cert option, such as the contents of a cert.pem file. *`''`*
     - rather than declaring `sec` as an object, you can set its value to one of the following **shorthands**:

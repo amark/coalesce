@@ -100,9 +100,9 @@ button {
 	m-argin: 1% 0;
 	padding: 7% 2.5%;
 	box-shadow: inset 0px 0px 100px 25px #000;
-	background: #111 url(http://subtlepatterns.com/patterns/rebel.png) repeat repeat;
+	background: #111 url(./rebel.png) repeat repeat;
 }
 
 .light {
-	b-ackground: url(http://subtlepatterns.subtlepatterns.netdna-cdn.com/patterns/skelatal_weave.png) repeat repeat;
+	b-ackground: url(./skelatal_weave.png) repeat repeat;
 }

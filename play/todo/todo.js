@@ -101,7 +101,7 @@ module.exports=require('theory')((function(){
 		}
 		todo = (function(m){
 			var to = todo, name = '', data, get = (function(m){
-				name = a(tryst,m.who.tid||m.what.tid||m.who.cid||m.who.to||'')||'';
+				name = a(tryst,m.who.sid||m.what.sid||m.who.tid||m.who.to||'')||'';
 				console.log("name: "+name);
 				return a(db,name)||{};
 			});
@@ -117,7 +117,6 @@ module.exports=require('theory')((function(){
 			});
 			to.list = (function(m){
 				console.log('.list:');
-				console.log(m);
 				if(!m.what.list) return;
 				if(m.what.tid) to.auth(m);
 				data = get(m);
@@ -148,8 +147,8 @@ module.exports=require('theory')((function(){
 						var data;
 						if(data=a(db,name)){
 							if(a(data,'soul.salt') == hash(m.what.pw)){
-								tryst[m.who.cid] = tryst[m.who.tid||m.what.tid] = name;
-								a.com('.list').send({list:data.list,who:m.who.cid});
+								tryst[m.who.sid] = tryst[m.who.tid||m.what.tid] = name;
+								a.com('.list').send({list:data.list,who:m.who.tid});
 								a.com.send({where:{on:name},who:m.who});
 								m.what = {pw:true,name:m.what.name};
 							}else{
@@ -165,8 +164,8 @@ module.exports=require('theory')((function(){
 								},
 								list: {"t0":{val:"Joined ToDo",done:true,id:"t0"}}
 							};
-							tryst[m.who.cid] = tryst[m.who.tid||m.what.tid] = name;
-							a.com('.list').send({list:a(db,name+'.list'),who:m.who.cid});
+							tryst[m.who.sid] = tryst[m.who.tid||m.what.tid] = name;
+							a.com('.list').send({list:a(db,name+'.list'),who:m.who.tid});
 							a.com.send({where:{on:name},who:m.who});
 							m.what = {pw:true,name:m.what.name};
 						}
@@ -178,12 +177,15 @@ module.exports=require('theory')((function(){
 					}else{
 						m.what.name = false;
 					}
+					console.log('todo auth reply!');
 					a.com.reply(m);
 					return;
 				}
-				if(m.what.tid && tryst[m.what.tid]){
-					m.who.tid = m.who.tid||m.what.tid;
-					a.com.send({where:{on:(tryst[m.who.cid] = tryst[m.who.tid])},who:m.who});
+				console.log('... in');
+				console.log(m);
+				if(m.what.tid && tryst[m.who.sid]){
+					console.log("auto logging in "+m.who.tid+" as "+ tryst[m.who.tid] +".");
+					a.com.send({where:{on:(tryst[m.who.tid] = tryst[m.who.sid])},who:m.who});
 				}
 			});
 			return to;

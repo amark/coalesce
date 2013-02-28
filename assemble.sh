@@ -1,6 +1,6 @@
 #!/bin/bash
 #To initiate this script, remember to dos2unix if on windows, and run (maybe with sudo) the following:
-#scp assemble.sh $USER@$IP:/home/$USER/ && ssh $USER@$IP 'sudo bash ./assemble.sh'
+#scp assemble.sh $USER@$IP:/home/$USER/ && ssh $USER@$IP 'bash ./assemble.sh'
 
 NODE=http://nodejs.org/dist/v0.8.15/node-v0.8.15.tar.gz
 MONGO=http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-2.2.2.tgz
@@ -9,6 +9,7 @@ PHANTOM=http://phantomjs.googlecode.com/files/phantomjs-1.5.0-linux-x86_64-dynam
 ZMQ=http://download.zeromq.org/zeromq-3.2.0-rc1.tar.gz
 
 IP=`curl -s checkip.dyndns.org | grep -Eo '[0-9\.]+'`
+USER=`whoami`
 
 echo "creating theory"
 
@@ -95,6 +96,7 @@ else
 	sudo cp * /usr/local/bin/
 	sudo mkdir -p /data/db
 	sudo chown ubuntu -fR /data /data/db /data/journal /var/log
+	sudo chown $USER -fR /data /data/db /data/journal /var/log
 	echo "mongo installed"
 fi
 
@@ -156,7 +158,8 @@ else
 	net.ipv4.tcp_rmem = 4096 4096 16777216
 	net.ipv4.tcp_wmem = 4096 4096 16777216" | sudo tee - a /etc/sysctl.conf
 	sudo mv /etc/cron.weekly/apt-xapian-index /etc/cron.monthly/apt-xapian-index
-
+	
+	PWD=`pwd`
 	echo "creating and initializing code"
 	sudo ln -s $PWD /usr/local/bin/theory
 	mkdir code
@@ -168,11 +171,17 @@ http.createServer(function (req, res) {
 	mkdir git
 	cd git
 	git init --bare
-	echo "DO LOCALLY: git remote add web ssh://$USER@$IP$PWD"
-	echo "DO LOCALLY: git push web +master:refs/heads/master"
+	PWD=`pwd`
+	echo "====== DO LOCALLY ======"
+	echo "git init"
+	echo "git add ."
+	echo "git commit -m 'init'"
+	echo "git remote add web ssh://$USER@$IP$PWD"
+	echo "git push web master"
+	echo "====== END LOCAL ======"
 	echo "#!/bin/sh
 sudo stop theory
-GIT_WORK_TREE=/usr/local/bin/theory/code git checkout -f
+GIT_WORK_TREE=/usr/local/bin/theory/code git checkout -f	
 sudo start theory
 echo 'deployed'" > hooks/post-receive
 	chmod +x hooks/post-receive
@@ -180,7 +189,7 @@ echo 'deployed'" > hooks/post-receive
 	sudo echo "limit nofile 999999 999999
 
 description 'start theory'
-author  'theory'
+author 'theory'
 
 start on runlevel [2345]
 stop on shutdown
@@ -206,18 +215,16 @@ set httpd port 8080 and
 	stop program  = '/sbin/stop theory'
 	if failed port 80 protocol HTTP
 		request /
-		with timeout 1 seconds
+		with timeout 2 seconds
 		then restart
 " > theory
 	sudo mv theory /etc/monit/conf.d/
 	sudo chown -fR ubuntu ~/theory
+	sudo chown -fR $USER ~/theory
 fi
 
 sudo start theory
-echo "IP:"
-echo $IP
-echo "DONE"
-echo ":)"
+echo "DONE :) $IP"
 
 # STUFF TO WORK ON:
 #SCALE ON: (in node)

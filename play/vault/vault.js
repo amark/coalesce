@@ -157,7 +157,7 @@ module.exports=require('theory')((function(){
 		});
 		$("#save").click(function(){
 			v.saved = 0;
-			$(this).html("<img src='/vault/sync.gif'>");
+			$(this).html("<img src='./sync.gif'>");
 			$("#oninfo").html("Your data has been successfully encrypted...");
 			v.data = v.en($("#data").val(),v.pass);
 			v.date = (v.com('.save').send(v.data)||{}).when;
