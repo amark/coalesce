@@ -1,1 +1,1 @@
-require('./coalesce')({port:7777, sec: -2});
+require('./coalesce')({port: (process.env.PORT||7777), sec: -2});

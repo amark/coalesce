@@ -1,5 +1,6 @@
 #!/bin/bash
-#To initiate this script, remember to dos2unix if on windows, and run (maybe with sudo) the following:
+#To initiate this script, remember to dos2unix if on windows, then run the following,
+#where $USER and $IP is the default username and IP of your remote Ubuntu 12.04 machine:
 #scp assemble.sh $USER@$IP:/home/$USER/ && ssh $USER@$IP 'bash ./assemble.sh'
 
 NODE=http://nodejs.org/dist/v0.8.15/node-v0.8.15.tar.gz

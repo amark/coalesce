@@ -177,14 +177,10 @@ module.exports=require('theory')((function(){
 					}else{
 						m.what.name = false;
 					}
-					console.log('todo auth reply!');
 					a.com.reply(m);
 					return;
 				}
-				console.log('... in');
-				console.log(m);
 				if(m.what.tid && tryst[m.who.sid]){
-					console.log("auto logging in "+m.who.tid+" as "+ tryst[m.who.tid] +".");
 					a.com.send({where:{on:(tryst[m.who.tid] = tryst[m.who.sid])},who:m.who});
 				}
 			});
