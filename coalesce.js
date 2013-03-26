@@ -50,10 +50,12 @@ module.exports=require('theory')((function(){
 				opt.run = {};
 				opt.run.is = run;
 			} opt.run = opt.run||{};
-			opt.run.impatient = opt.run.impatient||3*1000;
+			opt.run.impatient = opt.run.impatient||1000*.3;
 			opt.hook = opt.hook||{};
 			opt.hook.pre = opt.hook.pre||(function(){});
 			opt.hook.aft = opt.hook.aft||(function(){});
+			opt.hook.err = opt.hook.err||(function(){});
+			opt.hook.reply = opt.hook.reply||(function(){});
 			web.opt = a.obj(opt).u(web.opt||{});
 			web.theorize();
 			web.run(opt.run.is);
@@ -93,29 +95,31 @@ module.exports=require('theory')((function(){
 				else if(A > B){ return  1 }
 				else { return 0 }
 			});
-			state.map = (function(url,map){
+			state.map = (function(req,map){
+				var url = req.url || url;
 				map = map || state.ways;
-				var r = a.list(map).each(function(v,i){
+				return a.list(map).each(function(v,i){
 					if(!a.obj.is(v)){ return }
+					if(v.flow < (req.flow||-Infinity)){ return }
 					v.params = v.params || [];
 					if(a.text.is(v.match)){
-						v.regex = state.match(v);
+						v.regex = state.regex(v);
 					} if(a.text.is(v.regex)){
 						v.regex = new RegExp(v.regex,v.flags);
-					} if(a.fns(v.regex).of(RegExp)){
+					} if(a.test(v.regex).of(RegExp)){
 						var r = v.regex.exec(url.pathname);
 						if(r){
-							url.params = state.match(v,r||[]);
+							url.params = state.regex(v,r||[]);
 							return v;
 						}
 					} if(a.fns.is(v.match)){
 						if(v.match(url)){ return v}
 					}
-				})||{};
+				})||{flow:Infinity,on:state.err};
 				return (0 <= r.flow && (fs.existsSync||path.existsSync)(url.file))?
 					url.file : r.file || url.file;
 			});
-			state.match = (function(m,r){ // via expressjs
+			state.regex = (function(m,r){ // via expressjs
 				try{
 				var path = m.match, keys = m.params||[], params = {}, sensitive, strict;
 				if(r){ m = r; 
@@ -152,29 +156,53 @@ module.exports=require('theory')((function(){
 				return new RegExp('^' + path + '$', sensitive ? '' : 'i');
 				} catch(e){ console.log("something has gone expressively wrong."); }
 			});
-			state.way = (function(req){
-				return req.url.way = path.basename(req.url.map,path.extname(req.url.map));
+			state.url = (function(req){
+				var url = a.obj.is(req.url)? req.url : URL.parse(req.url,true);
+				url.ext = url.ext || path.extname(url.pathname).replace(/^\./,'');
+				return url;
 			});
+			state.file = (function(req,dir){
+				return path.normalize(path.join(dir||web.opt.dir,req.url.pathname));
+			});
+			state.way = (function(req){
+				var p = a.text.is(req||'')? req : (req.map.file || req.file) || '';
+				return path.basename(p,path.extname(p));
+			});
+			state.err = (function(req,res){
+				web.cookie.set(res,req.cookie);
+				state.dir.serve(req,res,function(e,r){
+					if(!e){ return web.opt.hook.aft(req,res) }
+					if(!req.flow){ return state.req(req,res,++req.flow) }
+					if(web.opt.hook.err(req,res,e,r)){ return }
+					res.writeHead(e.status, e.headers);
+					res.end();
+				});
+			});
+			state.ways.push({
+				way: 'state'
+				,match: '*'
+				,flow: 0
+				,on: state.err
+			})
 			state.req = (function(req,res){
+				req.url = state.url(req);
+				req.file = state.file(req);
+				req.map = state.map(req);
+				req.flow = req.map.flow;
+				req.cookies = web.cookie.parse(req);
+				req.cookies.sid = req.cookies.sid || web.opt.session.sid();
+				web.opt.hook.pre(req,res);
+				if(web.theorize(req,res)){ return }
+				if(req.flow === Infinity){ return state.err(req,res) }
 				a.fns.flow([function(next){
-					req.url = URL.parse(req.url,true);
-					req.url.ext = path.extname(req.url.pathname).replace(/^\./,'');
-					req.url.file = path.normalize(path.join(web.opt.dir,req.url.pathname));
-					req.url.type = mime.lookup(req.url.pathname);
-					req.url.map = state.map(req.url);
-					req.url.way = state.way(req);
-					req.cookies = web.cookie.parse(req);
-					req.cookies.sid = req.cookies.sid || web.opt.session.sid();
-					web.opt.hook.pre(req,res);
-					if(web.theorize(req,res)){ return }
-					next();
-				},function(next){
 					web.run.it({
-						file: req.url.map
-						,invincible: req.url.file != req.url.map
+						file: req.map.file || req.file
+						,invincible: req.map.file
 						,reply: state.msg
 					},function(v){
-						if(v && (v=req.url.way+'.'+a(web.run.on,req.url.way+'.meta.state.way'))){
+						if(v && (v=((v=state.way(req))+'.'
+							+a(web.run.on,v+'.meta.state.way')))
+						){
 							if(a.text(req.method).low() == 'post'){
 								var form = new formidable.IncomingForm();
 								req.form = {}; req.files = {};
@@ -185,12 +213,15 @@ module.exports=require('theory')((function(){
 									(req.files[k]||[]).push(v);
 								}).on('error',function(e){
 									console.log("formidable error:",e);
+									if(form.done){ return }
+									next(form.done = v);
 								}).on('end', function(){
-									next(v);
+									if(form.done){ return }
+									next(form.done = v);
 								});
 								return form.parse(req);
 							} return next(v);
-						} next.end();
+						} state.err(req,res);
 					});
 				},function(way,next){
 					var m = a.com.meta({how:{way:way,web:'state'},where:{pid:0}});
@@ -200,6 +231,7 @@ module.exports=require('theory')((function(){
 					m.what.headers = req.headers;
 					m.what.cookies = req.cookies;
 					web.reply(m,function(m){
+						web.opt.hook.reply(m);
 						if(m){
 							if(a(m,'what.body')){
 								if(m.what.type){
@@ -210,16 +242,14 @@ module.exports=require('theory')((function(){
 									res.setHeader('Content-Encoding', m.what.encoding);
 								} web.cookie.set(res,m.what.cookies||req.cookies); // on login, pragma to no-cache (?)
 								res.end(m.what.body);
-								web.opt.hook.aft(req,res);
-								return;
+								return web.opt.hook.aft(req,res);
 							} req.url.pathname = m.what.pathname||a(m.what,'url.pathname')||req.url.pathname;
+							if(m.what.pathname){ return state.err(req,res) }
+							req.flow = (m.what.flow === null)? Infinity : 
+								a.num.is(m.what.flow)? m.what.flow : (req.flow + 1);
 						} next(req,res);
 					});
-				}],function(){
-					web.cookie.set(res,req.cookie);
-					state.dir.serve(req,res);
-					web.opt.hook.aft(req,res);
-				});
+				}],state.req);
 			});
 			state.msg = (function(m,opt,con){
 				if(!a.obj.is(m)) return;
@@ -385,7 +415,7 @@ module.exports=require('theory')((function(){
 			run.it = (function(m,fn){
 				if(!m){ return }
 				var opt = m.what || m
-					, way = opt.way = path.basename(opt.file,path.extname(opt.file));
+					, way = opt.way = web.state.way(opt.file);
 				if(way === 'theory'){ return fn(false) }
 				if(opt.file == (module.parent||{}).filename){ return fn(false) }
 				if(!a.text.find.js.test(opt.file)){ return fn(false) } // ? why again ?
@@ -394,6 +424,7 @@ module.exports=require('theory')((function(){
 					if(a(run.on,way+'.meta.state')){ return fn(true) } // change API
 					return fn(false);
 				}
+				console.log("RUN :-->"+" testing "+opt.file)
 				var ts = a.time.is()
 					, p = fork(opt.file,[],{env:process.env})
 					, gear = run.on[way] || (run.on[way]={meta:{},cogs:{}})
@@ -408,7 +439,8 @@ module.exports=require('theory')((function(){
 						gear.meta = a.obj(m.mod).u(gear.meta);
 						web.state.ways.push(a(m,'mod.state'));
 						web.state.ways.sort(web.state.sort);
-						//run.track(opt,opt.reply);
+						opt.invincible = gear.meta.invincible
+						run.track(opt,opt.reply);
 						fn(p.pid||true); fn = function(){};
 						return;
 					} opt.reply(m,way);
@@ -419,8 +451,9 @@ module.exports=require('theory')((function(){
 						return;
 					} if(gear.meta.invincible){
 						cog.end = a.time.is();
-						console.log("coalesce.run -->"+" respawn: "+d+" >> "+way+" survived "+(cog.end - cog.start)/1000+" seconds. >> respawn: "+e);
+						console.log("RUN :-->"+" respawn: "+d+" >> "+way+" survived "+(cog.end - cog.start)/1000+" seconds. >> respawn: "+e);
 						delete gear.cogs[p.pid];
+						opt.respawn = true;
 						run.it(opt,(function(){}));
 						return;
 					} a.time.stop(opt.impatient);
@@ -428,15 +461,16 @@ module.exports=require('theory')((function(){
 					gear.meta.fatal = true;
 					cog.end = a.time.is();
 					delete cog.com; cog.com = {send:function(){}};
-					console.log("coalesce.run -->"+" exit: "+d+" >> "+way+" survived "+(cog.end - cog.start)/1000+" seconds. >> exit: "+e);
+					console.log("RUN :-->"+" exit: "+d+" >> "+way+" survived "+(cog.end - cog.start)/1000+" seconds. >> exit: "+e);
 				});
+				if(opt.respawn){ return }
 				opt.impatient = a.time.wait(function(){
 					fn(false); fn = function(){};
 				},web.opt.run.impatient);
 			});
 			run.tracked = {};
 			run.track = (function(opt,cb){ // depreciate
-				if(run.tracked[opt.way||opt.file]) return;
+				if(run.tracked[opt.way||opt.file]){ return }
 				fs.watchFile(opt.file,function(c,o){
 					opt.respawn = true;
 					run.it(opt,(function(p){
@@ -502,7 +536,7 @@ module.exports=require('theory')((function(){
 		})();
 		web.theorize = (function(req,res){
 			if(req){
-				if(a.text.low(path.basename(req.url.pathname,path.extname(req.url.pathname))) === 'theory'){
+				if(a.text.low(web.state.way(req.url.pathname)) === 'theory'){
 					req.cookies = web.cookie.tid(req);
 					if(!web.opt.no_global_theory_src){
 						web.cookie.set(res,req.cookies);

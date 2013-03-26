@@ -24,7 +24,8 @@ fi
 
 echo "getting core"
 sudo apt-get update -y
-sudo apt-get install wget curl zsh git-core build-essential openssl libssl-dev upstart monit libtool autoconf uuid-dev mdadm lvm2 xfsprogs -y
+sudo apt-get install wget curl zsh git-core build-essential openssl libssl-dev upstart monit libtool autoconf uuid-dev lvm2 xfsprogs -y
+sudo apt-get install mdadm --no-install-recommends -y
 
 cd ~/theory
 if [ -e /usr/local/bin/node ];
