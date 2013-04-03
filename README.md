@@ -234,7 +234,7 @@ So let's fiddle with the http function by overwriting it with this:
 ```
 			// HTTP Intercept:
 			console.log(m);
-			m.what.pathname = '/lastReq.js';
+			m.what.url.pathname = '/lastReq.js';
 			m.what.type = 'js';
 			a.com.reply(m);
 ```
@@ -345,7 +345,7 @@ console.log("Coalesce @ "+ opt.port);
     - `m.what.body` assign anything to this, and it will become the body of the response.
     - `m.what.type` allows you to set the Content-Type.
     - `m.what.encoding` to set the Content-Encoding.
-    - `m.what.pathname` shorthand for `m.what.url.pathname` useful for redirects.
+	- `m.what.redirect` to redirect to another URL.
 - `invincible` a boolean as to whether you want this module to respawn server side, in case it crashes. *`false`*
 
 Example:

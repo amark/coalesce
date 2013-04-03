@@ -4,7 +4,7 @@
 #scp assemble.sh $USER@$IP:/home/$USER/ && ssh $USER@$IP 'bash ./assemble.sh'
 
 NODE=http://nodejs.org/dist/v0.8.15/node-v0.8.15.tar.gz
-MONGO=http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-2.2.2.tgz
+MONGO=http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-2.4.1.tgz
 REDIS=http://redis.googlecode.com/files/redis-2.6.6.tar.gz
 PHANTOM=http://phantomjs.googlecode.com/files/phantomjs-1.5.0-linux-x86_64-dynamic.tar.gz
 ZMQ=http://download.zeromq.org/zeromq-3.2.0-rc1.tar.gz

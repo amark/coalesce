@@ -11,7 +11,7 @@ module.exports=require('theory')((function(){
 		,'https'
 		,'child_process'
 	];
-	web.init = (function(a){
+	web.init = (function(a){ // TODO: BUG: NEED TO UPDATE DOCUMENTATION TO CURRENT VERSION!!!!!
 		function web(opt){
 			return web.configure(opt);
 		} var	fs = a.fs
@@ -19,6 +19,7 @@ module.exports=require('theory')((function(){
 		,	URL = a.url;
 		web.opt = {};
 		web.configure = (function(opt){
+			if(opt.how){ return }
 			module.reqdir = a.path.dirname((module.parent||{}).filename);
 			opt = a.obj.is(opt)? opt : {};
 			opt.host = opt.host||'localhost';
@@ -169,7 +170,7 @@ module.exports=require('theory')((function(){
 				return path.basename(p,path.extname(p));
 			});
 			state.err = (function(req,res){
-				web.cookie.set(res,req.cookie);
+				web.cookie.set(res,req.cookies);
 				state.dir.serve(req,res,function(e,r){
 					if(!e){ return web.opt.hook.aft(req,res) }
 					if(!req.flow){ return state.req(req,res,++req.flow) }
@@ -232,8 +233,8 @@ module.exports=require('theory')((function(){
 					m.what.cookies = req.cookies;
 					web.reply(m,function(m){
 						web.opt.hook.reply(m);
-						if(m){
-							if(a(m,'what.body')){
+						if(m && m.what){
+							if(m.what.body){
 								if(m.what.type){
 									var type = mime.lookup(m.what.type||'')
 										,chs = mime.charsets.lookup(type);
@@ -243,8 +244,11 @@ module.exports=require('theory')((function(){
 								} web.cookie.set(res,m.what.cookies||req.cookies); // on login, pragma to no-cache (?)
 								res.end(m.what.body);
 								return web.opt.hook.aft(req,res);
+							} if(m.what.redirect){
+								res.writeHead(302,{'Location':m.what.redirect});
+								return res.end();
 							} req.url.pathname = m.what.pathname||a(m.what,'url.pathname')||req.url.pathname;
-							if(m.what.pathname){ return state.err(req,res) }
+							if(req.flow === 0){ return state.err(req,res) }
 							req.flow = (m.what.flow === null)? Infinity : 
 								a.num.is(m.what.flow)? m.what.flow : (req.flow + 1);
 						} next(req,res);
@@ -304,7 +308,9 @@ module.exports=require('theory')((function(){
 					m = a.com.meta(a.obj.ify(m),con);
 					web.cookie.tid(con,m,function(v){
 						if(!v){ return }
-						m.where.pid = (m.where.pid == process.pid)? 0 : m.where.pid;
+						if(web.name == a.list(m.how.way.split('.')).at(1)){
+							m.how.way = '';
+						} m.where.pid = (m.where.pid == process.pid)? 0 : m.where.pid;
 						state.msg(m);
 					});
 				});
@@ -343,20 +349,29 @@ module.exports=require('theory')((function(){
 						p = v.split(/=/);
 						c[p[0]] = p.slice(1).join('=');
 					});
-				}
-				return c;
+				} return c;
 			});
 			cookie.set = (function(res,c){
-				c = c || res.cookie || {};
-				if(web.opt && c.sid){c.$sid = {HttpOnly:true}}
+				var h = res.getHeader('Set-Cookie') || [], m;
+				if(a.text.is(h)){ h = [h] }; c = c || {};
+				if(c.sid){c.$sid = {HttpOnly:true}}
+				if(c.tid){ c.$tid = {HttpOnly:false}}
 				c = a.obj(c).each(function(v,i,t){
 					if(i.charAt(0) == '$' && c[(i=i.slice(1))]){
-						t(i+"="+c[i]+";"+(a.list(v).ify({wedge:'='})||[]).join(';'));
+						i = i+"="+c[i];
+						m = a.obj(v).each(function(w,j,q){ q(a.text.low(j),w) })||{};
+						m.httponly = a.obj(m).has('httponly')? m.httponly : true;
+						m.path = m.path || '/'; 
+						if(m.path){ i += "; path=" + m.path }
+						if(m.expires){ i += "; expires=" + m.expires }
+						if(m.domain){ i += "; domain=" + m.domain }
+						if(m.secure){ i += "; secure" }
+						if(m.httponly){ i += "; HttpOnly" }
+						t(i);
 						return;
-					}
-					t(i+'='+v);
+					} t(i+'='+v +"; path=/; HttpOnly");
 				})||[];
-				res.setHeader('Set-Cookie', c);
+				res.setHeader('Set-Cookie', a.list(h).fuse(c));
 			});
 			cookie.tid = (function(req,m,fn){
 				if(fn){
