@@ -203,19 +203,19 @@ module.exports = require('theory')
 , author: 'Mark Nadal'
 , version: 5
 , dependencies: [
-	'fs'
-],state = { way: 'server' }
+    'fs'
+],state: { way: 'server' }
 , invincible: true
 , init: (function(a){
-	return {
-		server: (function(m){ 
-			// HTTP Intercept:
-			console.log(m);
-			a.fs.writeFileSync('./lastReq.js', "alert('The last request was at "+Date()+"')");
-			m.what.body = "alert('Hello World!')";
-			a.com.reply(m);
-		})
-	}
+    return {
+        server: (function(m){ 
+            // HTTP Intercept:
+            console.log(m);
+            a.fs.writeFileSync(__dirname+'./lastReq.js', "alert('The last request was at "+Date()+"')");
+            m.what.body = "alert('Hello World!')";
+            a.com.reply(m);
+        })
+    }
 })});
 ```
 Now refresh the page, we should get an ugly ol'alert message. What we are learning...
