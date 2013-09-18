@@ -11,7 +11,7 @@ module.exports=require('theory')((function(){
 		,'https'
 		,'child_process'
 	];
-	web.init = (function(a){ // TODO: BUG: NEED TO UPDATE DOCUMENTATION TO CURRENT VERSION!!!!!
+	web.init = (function(a){ // TODO: BUG: NEED TO UPDATE DOCUMENTATION TO CURRENT VERSION!!!!!!
 		function web(opt){
 			return web.configure(opt);
 		} var	fs = a.fs
