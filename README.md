@@ -204,11 +204,11 @@ module.exports = require('theory')
 , version: 5
 , dependencies: [
 	'fs'
-],state: 'http'
+],state = { way: 'server' }
 , invincible: true
 , init: (function(a){
 	return {
-		http: (function(m){ 
+		server: (function(m){ 
 			// HTTP Intercept:
 			console.log(m);
 			a.fs.writeFileSync('./lastReq.js', "alert('The last request was at "+Date()+"')");
@@ -222,7 +222,7 @@ Now refresh the page, we should get an ugly ol'alert message. What we are learni
 
 1. Rather than parameters of name, initializing function, and optional dependencies - we can just have a single parameter that is similar to a package.json file.
 2. This also allows you to wrap it inside another self calling closure that returns an object, if you would like. This is the style seen in the examples, but not demonstrated here.
-3. The `state` property tells Coalesce where your module will intercept HTTP requests. In this case, we want to receive it in the 'http' function of our exported module.
+3. The `state` property tells Coalesce where your module will intercept HTTP requests. In this case, we want to receive it in the 'server' function of our exported module.
 4. Because Coalesce will assume a script is client side only if it crashes, we activate the `invincible` tag to tell Coalesce to respawn this module server side if it does crash.
 5. As the console will show, we have access to the request `m.what.url`, `m.what.headers`, and `m.what.cookies`.
 6. In the same way the communication module is available via `a.com`, our dependencies are available, so we can easily use the filesystem module via `a.fs`. A dependency of `['./subdir/module-name']` is accessible via `a['module-name']`.

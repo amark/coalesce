@@ -1,12 +1,12 @@
 { "name": "coalesce"
-, "version": "0.1.6"
+, "version": "0.1.7"
 , "author": "Mark Nadal"
 , "description": "Awesome web platform for distributed projects."
 , "homepage": "http://github.com/amark/coalesce"
 , "engines": ["node >= 0.6.6"]
 , "dependencies": {
     "theory": "~>0.2.3",
-    "node-static": "0.6.0",
+    "node-static": "0.7.1",
     "formidable": "1.0.11",
     "sockjs": "~>0.3.1",
     "mime": "~>1.2.4"

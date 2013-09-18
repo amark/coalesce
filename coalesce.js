@@ -1,7 +1,7 @@
 module.exports=require('theory')((function(){
 	var web = {};
 	web.name = 'web';
-	web.version = 1;
+	web.version = 1.7;
 	web.author = 'Mark';
 	web.dependencies = [
 		'fs'
@@ -234,18 +234,27 @@ module.exports=require('theory')((function(){
 					web.reply(m,function(m){
 						web.opt.hook.reply(m);
 						if(m && m.what){
-							if(m.what.body){
-								if(m.what.type){
-									var type = mime.lookup(m.what.type||'')
-										,chs = mime.charsets.lookup(type);
-									res.setHeader('Content-Type', type + (chs ? '; charset=' + chs : ''));
-								} if(m.what.encoding){
-									res.setHeader('Content-Encoding', m.what.encoding);
-								} web.cookie.set(res,m.what.cookies||req.cookies); // on login, pragma to no-cache (?)
+							if(m.what.type){
+								var type = mime.lookup(m.what.type||'')
+									,chs = mime.charsets.lookup(type);
+								res.setHeader('Content-Type', type + (chs ? '; charset=' + chs : ''));
+							} if(m.what.encoding){
+								res.setHeader('Content-Encoding', m.what.encoding);
+							} if(m.what.cache){
+								if(m.what.cache === 0){
+									res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+									res.setHeader('Pragma', 'no-cache');
+									res.setHeader('Expires', 0);
+								} else {
+									res.setHeader('Cache-Control', m.what.cache);
+								}
+							} if(m.what.body){
+								web.cookie.set(res,m.what.cookies||req.cookies); // on login, pragma to no-cache (?)
 								res.end(m.what.body);
 								return web.opt.hook.aft(req,res);
 							} if(m.what.redirect){
-								res.writeHead(302,{'Location':m.what.redirect});
+								res.setHeader('Location', m.what.redirect);
+								res.statusCode = 302;
 								return res.end();
 							} req.url.pathname = m.what.pathname||a(m.what,'url.pathname')||req.url.pathname;
 							if(req.flow === 0){ return state.err(req,res) }
@@ -261,13 +270,14 @@ module.exports=require('theory')((function(){
 					,opt = opt||{};
 				way = a.list(way.split('.')).at(1);
 				if(opt != way){
-					if(a[way]){
-						a(a(m,'how.way')+'->')(m);
-						return;
-					}else if(web.run.on[way] && !a(web.run.on,way+'.meta.fatal')){
+					if(web.run.on[way] && !a(web.run.on,way+'.meta.fatal')){
 						var to = web.run.to(way);
 						to.com && to.com.send && to.com.send(m);
 						to.count++;
+						return;
+					} else
+					if(a[way]){ // TODO: BUG: Warning this is a no-joke condition! It is now on bottom, but should still think about bug edge cases like "test".
+						a(a(m,'how.way')+'->')(m);
 						return;
 					}else{
 					}
@@ -310,7 +320,7 @@ module.exports=require('theory')((function(){
 						if(!v){ return }
 						if(web.name == a.list(m.how.way.split('.')).at(1)){
 							m.how.way = '';
-						} m.where.pid = (m.where.pid == process.pid)? 0 : m.where.pid;
+						} m.where.pid = (m.where.pid === process.pid)? 0 : m.where.pid;
 						state.msg(m);
 					});
 				});
@@ -330,8 +340,8 @@ module.exports=require('theory')((function(){
 				web.state.msg(m,m.how.way);
 				return;
 			}
-			if(web.run.res[m.when]){
-				a(web.run.res,m.when+'->')(m);
+			if(fn = web.run.res[m.when]){
+				fn(m);
 				delete web.run.res[m.when];
 				return;
 			}
@@ -351,25 +361,37 @@ module.exports=require('theory')((function(){
 					});
 				} return c;
 			});
-			cookie.set = (function(res,c){
+			cookie.set = (function(res,c,tid){
 				var h = res.getHeader('Set-Cookie') || [], m;
 				if(a.text.is(h)){ h = [h] }; c = c || {};
 				if(c.sid){c.$sid = {HttpOnly:true}}
-				if(c.tid){ c.$tid = {HttpOnly:false}}
+				if(c.tid){
+					if(!tid){ delete c.tid; }
+					else{ 
+						c.tid = tid; 
+						c.$tid = {HttpOnly:false} 
+					}
+				}
 				c = a.obj(c).each(function(v,i,t){
-					if(i.charAt(0) == '$' && c[(i=i.slice(1))]){
-						i = i+"="+c[i];
-						m = a.obj(v).each(function(w,j,q){ q(a.text.low(j),w) })||{};
-						m.httponly = a.obj(m).has('httponly')? m.httponly : true;
-						m.path = m.path || '/'; 
-						if(m.path){ i += "; path=" + m.path }
-						if(m.expires){ i += "; expires=" + m.expires }
-						if(m.domain){ i += "; domain=" + m.domain }
-						if(m.secure){ i += "; secure" }
-						if(m.httponly){ i += "; HttpOnly" }
-						t(i);
+					if(i.charAt(0) == '$'){
+						if(a.obj(c).has(i=i.slice(1))){
+							m = c[i];
+							delete c[i];
+							i = i+'='+m;
+							m = a.obj(v).each(function(w,j,q){ q(a.text.low(j),w) })||{};
+							m.httponly = a.obj(m).has('httponly')? m.httponly : true;
+							m.path = m.path || '/'; 
+							if(m.path){ i += "; path=" + m.path }
+							if(m.expires){ i += "; expires=" + m.expires }
+							if(m.domain){ i += "; domain=" + m.domain }
+							if(m.secure){ i += "; secure" }
+							if(m.httponly){ i += "; HttpOnly" }
+							t(i);
+						}
 						return;
-					} t(i+'='+v +"; path=/; HttpOnly");
+					} else					
+					if(a.obj(c).has('$'+i)){ return } 
+					t(i+'='+v +"; path=/; HttpOnly");
 				})||[];
 				res.setHeader('Set-Cookie', a.list(h).fuse(c));
 			});
@@ -431,7 +453,7 @@ module.exports=require('theory')((function(){
 				if(!m){ return }
 				var opt = m.what || m
 					, way = opt.way = web.state.way(opt.file);
-				if(way === 'theory'){ return fn(false) }
+				if(way === theory.name){ return fn(false) }
 				if(opt.file == (module.parent||{}).filename){ return fn(false) }
 				if(!a.text.find.js.test(opt.file)){ return fn(false) } // ? why again ?
 				if(!(fs.existsSync||path.existsSync)(opt.file)){ return fn(false) }
@@ -493,7 +515,7 @@ module.exports=require('theory')((function(){
 						a.obj(a(run.on,opt.way+'.cogs')).each(function(v,i){
 							if(v.pid === p) return;
 							if(v.end){
-								v.com && v.com.kill && v.com.kill();
+								v.com && v.com.kill && v.com.kill(); // not killing?
 								return;
 							}
 							v.end = a.time.is();
@@ -551,10 +573,10 @@ module.exports=require('theory')((function(){
 		})();
 		web.theorize = (function(req,res){
 			if(req){
-				if(a.text.low(web.state.way(req.url.pathname)) === 'theory'){
+				if(a.text.low(web.state.way(req.url.pathname)) === theory.name){
 					req.cookies = web.cookie.tid(req);
 					if(!web.opt.no_global_theory_src){
-						web.cookie.set(res,req.cookies);
+						web.cookie.set(res,req.cookies,req.cookies.tid);
 						res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8' });
 						res.end(a.theory_js,'utf-8');
 						return true;
@@ -574,7 +596,7 @@ module.exports=require('theory')((function(){
 				}
 			}
 		});
-		return web;
+		return a.web = web;
 	});
 	return web;
 })());

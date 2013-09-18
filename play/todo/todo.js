@@ -8,6 +8,7 @@ module.exports=require('theory')((function(){
 	]:[
 		'crypto'
 	];
+	todo.state = "http";
 	todo.init = (function(a){
 		if(root.page){
 			var list = $("#list"), add = $("#add"), auth = (function(b){
@@ -25,6 +26,7 @@ module.exports=require('theory')((function(){
 				auth(false);
 				$("#auth").fadeIn().on('submit click',function(){
 					a.com('.auth').ask({name: authn.val(), pw: authpw.val(), tid:root.who},function(m){
+						alert('check console');console.log(m);
 						if(m.what.pw){
 							root.whoami = m.what.name;
 							auth(true);
@@ -116,7 +118,7 @@ module.exports=require('theory')((function(){
 				sync(m.what.w,m.what.v,true);
 			});
 			to.list = (function(m){
-				console.log('.list:');
+				console.log('.list:', m);
 				if(!m.what.list) return;
 				if(m.what.tid) to.auth(m);
 				data = get(m);
@@ -137,7 +139,7 @@ module.exports=require('theory')((function(){
 			});
 			to.auth = (function(m){
 				if(!root.node) return;
-				console.log('todo.auth');
+				console.log('todo.auth', m);
 				data = get(m);
 				if(m.what.name){
 					m.what.name = a.text.is(m.what.name)? 
@@ -186,6 +188,9 @@ module.exports=require('theory')((function(){
 			});
 			return to;
 		});todo();
+		todo.http = function(m){
+			console.log('todo http state', m);
+		}
 		return todo;	
 	});
 	return todo;
