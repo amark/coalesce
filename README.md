@@ -354,7 +354,7 @@ Example:
 ### Messages ###
 >scroll up to see Messages section.
 
-##Random Ramblings...##
+## Random Ramblings... ##
 This is just tossing up a quick getting started guide, but it obviously is pretty vague.
 So I'll just explain as much as I can really quickly in a garbled mess.
 Programming is just 9 primitives - booleans, numbers, strings, texts, arrays, objects combined with loops, functions, and if statements.
@@ -363,3 +363,10 @@ The Theory library provides a solid foundation for this, an abstraction layer fo
 Coalesce creates the communication layer between all these modules, whether server to server, client to client, or server to client and vice versa,
 for all protocols - TCP, HTTP, Websocket, or AJAX, all with proper dependency, routing, and event pub/sub.
 This means when you write beautiful modules for your app, Coalesce automatically becomes a distributed scalable system because your files are physically separated.
+
+## Future ##
+Obviously this is still under development, and my todo list is huge. Immediately, there needs to be configuration options for adding message queues (Redis, ZeroMQ, etc.), swapping websocket libraries (SockJS, Socket.IO, ws, etc.), and cookie storage, and so on - these are all things that should "plug-in" to replace the sensible defaults. Tests are critical to add. Further out, it is intended to be cross-machine, not just cross-processes, the setup and config for that should be easy-peasy. Perhaps not within the scope of Coalesce core, but to facilitate with cross-machine fusing, it would make sense if scaling features existed to detect disk/cpu/ram overload and then auto-spawn new machines that then linked up. Lots of devops there!
+
+Here is to the future, help me create it! In the meanwhile, please experiment and play with it, and join me!
+
+*Note:* A couple bits of this documentation are out of date, if you run into any problems or if anything is confusing or not easy please let me know. I'll help you and then make sure to clarify and update things. Thanks!
