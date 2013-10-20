@@ -106,3 +106,11 @@ button {
 .light {
 	b-ackground: url(./skelatal_weave.png) repeat repeat;
 }
+
+.just {
+	text-align: justify;
+}
+
+#top {
+	overflow: hidden;
+}

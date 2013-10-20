@@ -5,7 +5,7 @@
 		<link rel="stylesheet" href="./vault.css">
 	</head>
 	<body>
-		<div id="top">
+		<div id="top" class="just">
 			<span class="chapter">
 				DECENTRALIZED
 			</span>
@@ -64,11 +64,28 @@ Each person that comes online might have a copy of your encrypted data, and it w
 		<div class="pulse">
 			There <span id="onverb">are</span> currently <span id="online">?</span> decentralized data store<span id="onplur"></span> online. <span id="oninfo"></span>
 		</div>
+		<div id="instr" class="just">
+			<b>How To:</b> If no other 'stores' are online, open this page up in a separate window (or browser) and then type in a pseudonym and pass phrase.
+			Hit activate and then type in some secret message, click save. Then to test if it worked, refresh the page and login - your message should reappear!
+			Next, close your other browser, refresh and login - your message can't load if there are no other stores available,
+			or if the current stores are different from the ones that your data was saved to originally. Happy Encrypting!
+			<b>Future:</b> Evolve into codename Kraken, which will be an open source tool that anybody can deploy to a server
+			to provide realtime message relays between encrypted clients. It will automatically pair up with other servers into a redundant mesh net,
+			and client editors will handle conflicts and merges. Interested? Message <a href="mailto:mark@accelsor.com">me</a>!
+		</div>
 		<div id="store">
 			
 		</div>
 		<script src="/theory.js">
 			require('./vault.js');
 		</script>
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-44988299-2', 'coalesce.herokuapp.com');
+ga('send', 'pageview');
+</script>
 	</body>
 </html>

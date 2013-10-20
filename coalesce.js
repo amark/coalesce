@@ -229,8 +229,9 @@ module.exports=require('theory')((function(){
 					m.what.url = req.url;
 					m.what.form = req.form;
 					m.what.files = req.files;
-					m.what.headers = req.headers;
 					m.what.cookies = req.cookies;
+					m.what.headers = req.headers;
+					m.what.method = a.text(req.method).low();
 					web.reply(m,function(m){
 						web.opt.hook.reply(m);
 						if(m && m.what){
@@ -248,14 +249,14 @@ module.exports=require('theory')((function(){
 								} else {
 									res.setHeader('Cache-Control', m.what.cache);
 								}
-							} if(m.what.body){
-								web.cookie.set(res,m.what.cookies||req.cookies); // on login, pragma to no-cache (?)
-								res.end(m.what.body);
-								return web.opt.hook.aft(req,res);
-							} if(m.what.redirect){
+							} web.cookie.set(res,m.what.cookies||req.cookies); // on login, pragma to no-cache (?)
+							if(m.what.redirect){
 								res.setHeader('Location', m.what.redirect);
 								res.statusCode = 302;
 								return res.end();
+							} if(m.what.body){
+								res.end(a.text.is(m.what.body)?m.what.body:a.text.ify(m.what.body));
+								return web.opt.hook.aft(req,res);
 							} req.url.pathname = m.what.pathname||a(m.what,'url.pathname')||req.url.pathname;
 							if(req.flow === 0){ return state.err(req,res) }
 							req.flow = (m.what.flow === null)? Infinity : 
