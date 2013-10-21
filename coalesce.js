@@ -11,7 +11,8 @@ module.exports=require('theory')((function(){
 		,'https'
 		,'child_process'
 	];
-	web.init = (function(a){ // TODO: BUG: NEED TO UPDATE DOCUMENTATION TO CURRENT VERSION!!!!!! BUG CRASHING WITH "CAN'T RESEND HEADERS TO CLIENT" ON HEROKU.
+	web.init = (function(a){ // TODO: BUG: NEED TO UPDATE DOCUMENTATION TO CURRENT VERSION!!!!!!
+		// ?? when I plug my laptop in, VBOX freaks out.
 		function web(opt){
 			return web.configure(opt);
 		} var	fs = a.fs
