@@ -11,7 +11,7 @@ module.exports=require('theory')((function(){
 		,'https'
 		,'child_process'
 	];
-	web.init = (function(a){ // TODO: BUG: NEED TO UPDATE DOCUMENTATION TO CURRENT VERSION!!!!!!
+	web.init = (function(a){ // TODO: BUG: NEED TO UPDATE DOCUMENTATION TO CURRENT VERSION!!!!!! BUG CRASHING WITH "CAN'T RESEND HEADERS TO CLIENT" ON HEROKU.
 		function web(opt){
 			return web.configure(opt);
 		} var	fs = a.fs
@@ -77,6 +77,7 @@ module.exports=require('theory')((function(){
 				}
 				state.on.addListener('request',state.req);
 				state.on.addListener('upgrade',function(req,res){
+					if(state.sent(res)){ return }
 					res.end();
 				});
 				state.on.listen(web.opt.port);
@@ -157,6 +158,9 @@ module.exports=require('theory')((function(){
 				return new RegExp('^' + path + '$', sensitive ? '' : 'i');
 				} catch(e){ console.log("something has gone expressively wrong."); }
 			});
+			state.sent = (function(res){
+				if(res.headerSent) { return true }
+			});
 			state.url = (function(req){
 				var url = a.obj.is(req.url)? req.url : URL.parse(req.url,true);
 				url.ext = url.ext || path.extname(url.pathname).replace(/^\./,'');
@@ -175,6 +179,7 @@ module.exports=require('theory')((function(){
 					if(!e){ return web.opt.hook.aft(req,res) }
 					if(!req.flow){ return state.req(req,res,++req.flow) }
 					if(web.opt.hook.err(req,res,e,r)){ return }
+					if(state.sent(res)){ return }
 					res.writeHead(e.status, e.headers);
 					res.end();
 				});
@@ -253,8 +258,10 @@ module.exports=require('theory')((function(){
 							if(m.what.redirect){
 								res.setHeader('Location', m.what.redirect);
 								res.statusCode = 302;
+								if(state.sent(res)){ return }
 								return res.end();
 							} if(m.what.body){
+								if(state.sent(res)){ return }
 								res.end(a.text.is(m.what.body)?m.what.body:a.text.ify(m.what.body));
 								return web.opt.hook.aft(req,res);
 							} req.url.pathname = m.what.pathname||a(m.what,'url.pathname')||req.url.pathname;
@@ -578,6 +585,7 @@ module.exports=require('theory')((function(){
 					req.cookies = web.cookie.tid(req);
 					if(!web.opt.no_global_theory_src){
 						web.cookie.set(res,req.cookies,req.cookies.tid);
+						if(web.state.sent(res)){ return }
 						res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8' });
 						res.end(a.theory_js,'utf-8');
 						return true;
