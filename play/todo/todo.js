@@ -8,7 +8,7 @@ module.exports=require('theory')((function(){
 	]:[
 		'crypto'
 	];
-	todo.state = "http";
+	todo.state = {way: "server"};
 	todo.init = (function(a){
 		if(root.page){
 			var list = $("#list"), add = $("#add"), auth = (function(b){
@@ -26,7 +26,6 @@ module.exports=require('theory')((function(){
 				auth(false);
 				$("#auth").fadeIn().on('submit click',function(){
 					a.com('.auth').ask({name: authn.val(), pw: authpw.val(), tid:root.who},function(m){
-						alert('check console');console.log(m);
 						if(m.what.pw){
 							root.whoami = m.what.name;
 							auth(true);
@@ -158,7 +157,7 @@ module.exports=require('theory')((function(){
 							}
 						}else{
 							var salt = hash(m.what.pw);
-							db[name] = {
+							db[name] = { // Use a database, fool.
 								soul: {
 									salt: salt
 									,name: m.what.name
@@ -188,8 +187,9 @@ module.exports=require('theory')((function(){
 			});
 			return to;
 		});todo();
-		todo.http = function(m){
+		todo.server = function(m){
 			console.log('todo http state', m);
+			a.com.reply(m);
 		}
 		return todo;	
 	});
