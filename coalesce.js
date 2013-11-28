@@ -240,7 +240,7 @@ module.exports=require('theory')((function(){
 					m.what.method = a.text(req.method).low();
 					web.reply(m,function(m){
 						web.opt.hook.reply(m);
-						if(m && m.what){
+						if(m && m.what !== undefined){
 							if(m.what.type){
 								var type = mime.lookup(m.what.type||'')
 									,chs = mime.charsets.lookup(type);
