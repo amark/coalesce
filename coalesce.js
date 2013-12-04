@@ -261,7 +261,7 @@ module.exports=require('theory')((function(){
 								res.statusCode = 302;
 								if(state.sent(res)){ return }
 								return res.end();
-							} if(m.what.body){
+							} if(m.what.body !== undefined){
 								if(state.sent(res)){ return }
 								res.end(a.text.is(m.what.body)?m.what.body:a.text.ify(m.what.body));
 								return web.opt.hook.aft(req,res);
