@@ -241,13 +241,13 @@ module.exports=require('theory')((function(){
 					web.reply(m,function(m){
 						web.opt.hook.reply(m);
 						if(m && m.what !== undefined){
-							if(m.what.type){
+							if(m.what.type !== undefined){
 								var type = mime.lookup(m.what.type||'')
 									,chs = mime.charsets.lookup(type);
 								res.setHeader('Content-Type', type + (chs ? '; charset=' + chs : ''));
-							} if(m.what.encoding){
+							} if(m.what.encoding !== undefined){
 								res.setHeader('Content-Encoding', m.what.encoding);
-							} if(m.what.cache){
+							} if(m.what.cache !== undefined){
 								if(m.what.cache === 0){
 									res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
 									res.setHeader('Pragma', 'no-cache');
@@ -256,9 +256,11 @@ module.exports=require('theory')((function(){
 									res.setHeader('Cache-Control', m.what.cache);
 								}
 							} web.cookie.set(res,m.what.cookies||req.cookies); // on login, pragma to no-cache (?)
-							if(m.what.redirect){
+							if(m.what.status !== undefined){
+								res.statusCode = m.what.status;
+							} if(m.what.redirect !== undefined){
 								res.setHeader('Location', m.what.redirect);
-								res.statusCode = 302;
+								res.statusCode = m.what.status || 302;
 								if(state.sent(res)){ return }
 								return res.end();
 							} if(m.what.body !== undefined){
