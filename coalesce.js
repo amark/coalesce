@@ -1,7 +1,7 @@
 module.exports=require('theory')((function(){
 	var web = {};
 	web.name = 'web';
-	web.version = 1.7;
+	web.version = 1.8;
 	web.author = 'Mark';
 	web.dependencies = [
 		'fs'
@@ -12,7 +12,6 @@ module.exports=require('theory')((function(){
 		,'child_process'
 	];
 	web.init = (function(a){ // TODO: BUG: NEED TO UPDATE DOCUMENTATION TO CURRENT VERSION!!!!!!
-		// ?? when I plug my laptop in, VBOX freaks out.
 		function web(opt){
 			return web.configure(opt);
 		} var	fs = a.fs
@@ -52,7 +51,7 @@ module.exports=require('theory')((function(){
 				opt.run = {};
 				opt.run.is = run;
 			} opt.run = opt.run||{};
-			opt.run.impatient = opt.run.impatient||1000*.3;
+			opt.run.impatient = opt.run.impatient||1000*3;
 			opt.hook = opt.hook||{};
 			opt.hook.pre = opt.hook.pre||(function(){});
 			opt.hook.aft = opt.hook.aft||(function(){});
@@ -279,7 +278,7 @@ module.exports=require('theory')((function(){
 				if(!a.obj.is(m)) return;
 				var way = a(m,'how.way')||a(m,'way')||''
 					,opt = opt||{};
-				way = a.list(way.split('.')).at(1);
+				way = a.text(way).clip('.',0,1);
 				if(opt != way){
 					if(web.run.on[way] && !a(web.run.on,way+'.meta.fatal')){
 						var to = web.run.to(way);
@@ -303,26 +302,26 @@ module.exports=require('theory')((function(){
 					return web.event.emit(m.where.at,m);
 				}
 				if((con = state.con.s[m.who.to||'']) && con.writable){
-					return con.write(a.text(m).ify());
+					return con.write(a.text(state.con.clean(m)).ify());
 				}
 			});
 			state.sub = (function(m,opt,con){
 				if(	!a.obj.is(m) || !a.obj.is(m.where) ||
 					!a(m,'who.tid') || !(con = state.con.s[m.who.tid])) return;
 				if(m.where.off){
-					if(!con.where[m.where.off]) return;
-					web.event.off(con.where[m.where.off]);
-					delete con.where[m.where.off];
+					if(!con.hear[m.where.off]) return;
+					web.event.off(con.hear[m.where.off]);
+					delete con.hear[m.where.off];
 					return con;
-				} if(con.where[m.where.on]) return con;
-				con.where[m.where.on] = web.event.on(m.where.on,function(m){
+				} if(con.hear[m.where.on]) return con;
+				con.hear[m.where.on] = web.event.on(m.where.on,function(m){
 					if(!con.writable || con.tid == m.who.tid || !state.con.s[con.id]) return;
-					con.write(a.text.ify(m));
+					con.write(a.text.ify(state.con.clean(m)));
 				});
 				return con;
 			});
 			state.con = (function(con){
-				con.where = {};
+				con.hear = {};
 				state.con.s = state.con.s||{};
 				state.con.s[con.id] = con;
 				con.on('data',function(m){
@@ -337,11 +336,19 @@ module.exports=require('theory')((function(){
 				});
 				con.on('close',function(m){
 					console.log(con.id+" disconnected.");
-					a.obj(con.where).each(function(v,i){
+					a.obj(con.hear).each(function(v,i){
 						web.event.off(v);
 					});
 					delete state.con.s[con.id];
 				});
+			});
+			state.con.clean = (function(m){
+				if(!m) return {};
+				m.who = {tid:m.who.tid,sid:m.who.sid
+					,to:m.who.to,from:m.who.from
+					,of:m.who.of,via:m.who.via
+				};
+				return m;
 			});
 			return state;
 		})();		
@@ -375,51 +382,66 @@ module.exports=require('theory')((function(){
 			cookie.set = (function(res,c,tid){
 				var h = res.getHeader('Set-Cookie') || [], m;
 				if(a.text.is(h)){ h = [h] }; c = c || {};
-				if(c.sid){c.$sid = {HttpOnly:true}}
+				if(c.sid){
+					c.sid = {value: c.sid.value || c.sid.val || c.sid, HttpOnly:true};
+				}
 				if(c.tid){
 					if(!tid){ delete c.tid; }
 					else{ 
-						c.tid = tid; 
-						c.$tid = {HttpOnly:false} 
+						c.tid = {value: c.tid.value || c.sid.tal || c.tid, HttpOnly:false};
 					}
 				}
-				c = a.obj(c).each(function(v,i,t){
-					if(i.charAt(0) == '$'){
-						if(a.obj(c).has(i=i.slice(1))){
-							m = c[i];
-							delete c[i];
-							i = i+'='+m;
-							m = a.obj(v).each(function(w,j,q){ q(a.text.low(j),w) })||{};
-							m.httponly = a.obj(m).has('httponly')? m.httponly : true;
-							m.path = m.path || '/'; 
-							if(m.path){ i += "; path=" + m.path }
-							if(m.expires){ i += "; expires=" + m.expires }
-							if(m.domain){ i += "; domain=" + m.domain }
-							if(m.secure){ i += "; secure" }
-							if(m.httponly){ i += "; HttpOnly" }
-							t(i);
-						}
-						return;
-					} else					
-					if(a.obj(c).has('$'+i)){ return } 
-					t(i+'='+v +"; path=/; HttpOnly");
+				c = a.obj(c).each(function(v,i,t){ // TODO: BUG: Update documentation to reflect the new API. No more $cookie, just cookie = {value: 'blah', path: '/'}
+					if(a.text.is(v)){
+						v = {value: v};
+					} if(a.obj.is(v)){
+						i = i+'='+v.value || v.val || '';
+						m = a.obj(v).each(function(w,j,q){ q(a.text.low(j),w) })||{};
+						m.httponly = a.obj(m).has('httponly')? m.httponly : true;
+						m.path = m.path || '/'; 
+						if(m.path){ i += "; path=" + m.path }
+						if(m.expires){ i += "; expires=" + m.expires }
+						if(m.domain){ i += "; domain=" + m.domain }
+						if(m.secure){ i += "; secure" }
+						if(m.httponly){ i += "; HttpOnly" }
+						t(i);
+					}
 				})||[];
 				res.setHeader('Set-Cookie', a.list(h).fuse(c));
 			});
 			cookie.tid = (function(req,m,fn){
 				if(fn){
 					if(req.sid || req.tid){
+						m.who = a.obj(req.who||{}).u(m.who);
+						m.how = a.obj(req.how||{}).u(m.how);
+						m.where = a.obj(req.where||{}).u(m.where);
 						m.who.tid = req.tid;
 						m.who.sid = req.sid;
 						return fn(true);
 					} if(m.who.tid){
 						// GETEX REDIS HERE
 						
-						var s, t = a.time.is();
+						var s, t = a.time.is(), w;
 						if(s = cookie.tryst[m.who.tid]){
 							web.state.con.s[req.tid = m.who.tid] = req;
 							req.sid = m.who.sid = s.sid;
-							fn(true);
+							
+							if((w = a.text(m.how.way).clip('.',0,1)) && (w+='.'+a(web.run.on,w+'.meta.stream.on'))){
+								var n = a.com.meta({what:s,who:m.who,how:{way:w,web:'stream'},where:{pid:0}});
+								n.what.data = m.what;
+								web.reply(n,function(n){
+									delete n.who.to;
+									delete n.where.pid;
+									delete n.how.way;
+									delete n.how.web;
+									req.who = n.who;
+									req.how = n.how;
+									req.where = n.where;
+									cookie.tid(req,m,fn);
+								});
+							} else {
+								fn(true);
+							}
 						} else {
 							if(web.opt.sec.incognito){ req.sid = req.tid = m.who.tid; fn(true) }
 						} delete cookie.tryst[m.who.tid];
@@ -434,7 +456,15 @@ module.exports=require('theory')((function(){
 					// SETEX REDIS HERE
 					
 					cookie.tryst[req.cookies.tid = web.opt.session.tid()] 
-						= {sid: req.cookies.sid, ts: a.time.is()}
+						= {sid: req.cookies.sid, ts: a.time.is()
+						, cookies: a.obj(req.cookies).each(function(v,i,t){
+							if(a.obj.is(v)){
+								t(i, v.value || v.val || '');
+							}else{
+								t(i, v || '');
+							} 
+						})
+					}
 					return req.cookies;
 				}
 			});
