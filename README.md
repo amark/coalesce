@@ -5,7 +5,7 @@ _Fuses your code into an emergent superstructure._
 
 As simple as:
 ```
-npm install coalesce && node -e "require('coalesce')({port:7777, sec: -2})"
+npm install coalesce && node -e "require('coalesce')({port:8888, sec: -2})"
 ```
 
 That is it, now you can create infinite new projects, like this one:
@@ -31,18 +31,18 @@ module.exports = require('theory')
 
     a.com.send({ what: "World", where: {on: 'magic'} });
 
-    return (document.onkeyup = function(m){
+    return (document.hello.to.onkeyup = function(m){
 	
-		m.what? document.hello.to.value = m.what : a.com.send({ 
-		what: 	document.hello.to.value, where: 'magic' });
+		m && m.what? document.hello.to.value = m.what :
+		a.com.send({what: document.hello.to.value, where: 'magic' });
 		
     });
 
 });
 ```
-Save these two files to the same directory as the install.
+Save these two files in a subfolder called 'play' in the same directory as the install. (Don't want to copy/paste? Just clone this repo and run `node init.js` in it instead of the npm command.)
 
-Now load <http://localhost:7777/hello.html> in 2 windows, side by side, the inputs will synchronize when you type!
+Now load <http://localhost:8888/play/hello.html> in 2 windows, side by side, the inputs will synchronize when you type!
 
 Curiosity perked? Check out the two test apps in the playground by simply navigating to them in your browser. Or, read on. Here are some quick hints at why it is awesome (skip this to continue to code examples).
 
@@ -79,7 +79,7 @@ This finally makes it easy to manage any type of large project.
 If one of your dependencies is also a module, which has dependencies within it, everything asynchronously cascades.
 The Theory library makes sure any Inception style depth level of dependencies is all stacked up properly before your code runs.
 
-Hey, afterall, Cobb's wife Mal lives in the Unconstructed Dream Space, and she is named after me**mAl**locate, which is a nightmare for your memory.
+Hey, afterall, Cobb's wife Mal lives in the Unconstructed Dream Space, and she is named after me*mAl*locate, which is a nightmare for your memory.
 (if you didn't laugh... ignore this ever happened)
 
 So you are probably like, hey, that is what Theory does, but what is Coalesce? 
@@ -87,7 +87,7 @@ So you are probably like, hey, that is what Theory does, but what is Coalesce?
 But it provides more than just a seamless TCP / HTTP / AJAX / Websocket communication layer for your apps, it also automatically distributes and deploys them.
 
 This is kind of a throwback to PHP, but don't worry, in a good way.
-Restart Coalesce with `node -e "require('coalesce')({port:7777})"`, you run this once and it acts as the master web server.
+Restart Coalesce with `node -e "require('coalesce')({port:8888})"`, you run this once and it acts as the master web server.
 You then create your app - let's overwrite hello.js, again, to this:
 ```
 module.exports = require('theory')
@@ -97,7 +97,7 @@ module.exports = require('theory')
 
 });
 ```
-When you fire up <http://localhost:7777/hello.html> from your browser, your browser makes a request to load 'hello.js'.
+When you fire up <http://localhost:8888/play/hello.html> from your browser, your browser makes a request to load 'hello.js'.
 Coalesce then attempts to execute 'hello.js' as a separate Node process. 
 If it crashes, it assumes it is a client only script, like jQuery, and serves it as a static file and remembers to do so in future.
 (Note: The assumptions and static server behaviors can be modified or overwritten, as described in the API).
@@ -124,7 +124,7 @@ module.exports = require('theory')
 
 });
 ```
-Now when you refresh <http://localhost:7777/hello.html> you should see your Node console print out the message that had been sent from the browser.
+Now when you refresh <http://localhost:8888/play/hello.html> you should see your Node console print out the message that had been sent from the browser.
 There are several things to learn from this.
 
 ###Conclusion###
@@ -206,17 +206,17 @@ module.exports = require('theory')
     'fs'
 ],state: { way: 'server' }
 , invincible: true
-, init: (function(a){
+, init: function(a){
     return {
-        server: (function(m){ 
+        server: function(m){
             // HTTP Intercept:
             console.log(m);
             a.fs.writeFileSync(__dirname+'./lastReq.js', "alert('The last request was at "+Date()+"')");
             m.what.body = "alert('Hello World!')";
             a.com.reply(m);
-        })
+        }
     }
-})});
+}});
 ```
 Now refresh the page, we should get an ugly ol'alert message. What we are learning...
 
@@ -228,41 +228,36 @@ Now refresh the page, we should get an ugly ol'alert message. What we are learni
 6. In the same way the communication module is available via `a.com`, our dependencies are available, so we can easily use the filesystem module via `a.fs`. A dependency of `['./subdir/module-name']` is accessible via `a['module-name']`.
 7. We can modify the response, by setting a `m.what.body`, `m.what.type`, and so on.
 8. `a.com.reply` is a helper that accepts the message passed into the function, which you modify directly, and sends it back to whatever had sent it. It is used by Coalesce for HTTP replies, and by `a.com.ask` client side.
-9. You should never write code with alert messages, writing useless data directly to the filesystem on every request, and inline javascript code. Iuck, do as I say, not as I do.
+9. You should never write code with alert messages, writing useless data directly to the filesystem on every request, and inline javascript code. Bleck, do as I say, not as I do.
 
 So let's fiddle with the http function by overwriting it with this:
 ```
-			// HTTP Intercept:
-			console.log(m);
-			m.what.url.pathname = '/lastReq.js';
-			m.what.type = 'js';
-			a.com.reply(m);
+            // HTTP Intercept:
+            console.log(m);
+            m.what.url.pathname = '/play/lastReq.js';
+            m.what.type = 'js';
+            a.com.reply(m);
 ```
 Refresh and bam. It delivered the file we created previously by changing the route of the pathname.
 
 This is interesting, though, because a lot of times we don't want our REST endpoint to be at some ugly path to filename, let alone then only be used to redirect to some other filename. We want the opposite, we want some pretty (extensionless) endpoint name which maps request(s) to our process. That way we could do things like `/hello` or `/hello/user/mark` or `/hello?name=mark`. Not all apps are like this, and therefore Coalesce should not force this, nor should it prevent it.
 
-In order to configure this, we can't dynamically wait for our app to automatically be deployed - this is the sort of thing that has to be hard configured, Coalesce has to filter these against every request in the same way it checks and remembers modules and files. In essence, since these routes are permanent, they have to be explicitly given to Coalesce. This means we need to finally write an actual init script for Coalesce, rather than running it from the command line.
+In order to configure this, we can't dynamically wait for our app to automatically be deployed - because the browser will never be requesting that file, but the pretty route instead! Therefore we must tell Coalesce to run our app at start up, so that way it will be ready and listening on that route. First, we need to update or create the initialization.
 
 **init.js**
 ```
 require('coalesce')({
-	port: 7777
-	,map: [
-		{flow: -1
-		,match: function(url){
-			if(!url.ext) return true;
-		},file: __dirname+'/hello.js'}
-	]
+	port: 8888
+	,run: ['./play/hello']
 });
 ```
-Save this to the same folder, and restart Coalesce now with `node init.js`. Some quick points:
+Save or replace this to the install or repo folder, and restart Coalesce now with `node init.js`. Next update your hello.js to have a state proprety of `{ way: 'server', match: '/asdf', flow: -1 }`. Some quick points:
 
 1. Coalesce takes a single parameter which is an options object.
-2. One of the options is a mapping property which simply is an array of mapping objects. They are simple.
+2. You declare your routes in your app itself with the state property, not in the configuration - this makes things super flexible.
 3. Flow controls the priority or weight or ordering of your route. The static file server is at `0`, so negative numbers allow you to catch and respond to a request before the file on disk is sent - thus blocking or overwriting it, if you want, for security purposes. Positive numbers will only be received if the file doesn't already exist.
-4. Match is pretty much self descriptive. It is a function which receives the URL object from the request. Returning `true` indicates you want to intercept the request. In this case, we intercept every request which has no extension. Matching functions should be as light weight as possible.
-5. File is the path to the file the request is to be mapped to and intercepted by. It is assumed to be a module that is compatible with Coalesce and have a request `state`. This file will automatically receive the `invincible` attribute, so it is not necessary to always declare it in the module.
+4. Match is pretty much self descriptive, it is the path relative to the server that you want to listen on. You can also have dynamic routes, using basic string pattern matching symbols, that map into parameters.
+5. For anything more complex, do not use the `state.match`, instead send a regex as a string on `state.regex` and `state.flags` which Coalesce will evaluate.
 
 Alright, now let's update the http function of our hello.js file again:
 ```
@@ -271,7 +266,7 @@ Alright, now let's update the http function of our hello.js file again:
 			m.what.body = "Hello, "+ (m.what.url.query.name || 'World') +"!";
             a.com.reply(m);
 ```
-Awesome sauce, hit up <http://localhost:7777/asdf?name=Mark> and look what it says! Now try playing around with it yourself. That's all for now on this topic, folks.
+Awesome sauce, hit up <http://localhost:8888/asdf?name=Mark> and look what it says! Now try playing around with it yourself. That's all for now on this topic, folks.
 
 ## Intercepting Sockets ##
 This is done by default, upon `a.com.send` and mapped directly to your main module function. You can also communicate to other modules, via `a.com('yourOtherModule').send`, which will always pass through the server side module first. Once received, you then decide if you want to `a.com.reply` back to the client, or `m.where` client side you want to `a.com.send` it out to. Server to browser communication can only be emitted from and to the same module, unless you enable the `relay` property in the security options on your Coalesce initialization - but warning, this is a security vulnerability. This relay option was necessary for the examples to work.
@@ -293,8 +288,6 @@ If you think about this it pretty much gives you complete control over every pos
 - `host` the hostname you want for the server. *`'localhost'`*
 - `port` the port which you want the server to listen on. *`80`*
 - `dir` the root directory for the server. *(defaults to the directory of file requiring coalesce)*
-- `pre` a function which gets called prior to trickling down the flow of the maps, if any. Good for any global request monitoring, like `console.log`ing the `req.url` for debugging purposes. *`function(req,res){ }`*
-- `post` a function which gets called after the response is sent. *`function(req,res){ }`*
 - `sec` the security options object.
     - `relay` allows messages to pass through the server to other clients automatically if there is no matching module to route to. *`false`*
     - `incognito` no session cookie tracking, equivalent to a browser's incognito mode, except for the server. *`false`*
@@ -302,28 +295,29 @@ If you think about this it pretty much gives you complete control over every pos
     - `cert` same as https.createServer's cert option, such as the contents of a cert.pem file. *`''`*
     - rather than declaring `sec` as an object, you can set its value to one of the following **shorthands**:
     - `-2` == `{relay: true, incognito: true}`
-- `map` an array of map objects, each object should have the following properties:
-    - `flow` the priority weight of the map, the ordering they are sorted. The request flows down from earlier numbers, to `0`, which is the static file server, to later numbers. *`0`*
-    - `match` a function with the URL object of the request, used to filter and determine a match. Return `true` to indicate whether you want the request to be intercepted. *`function(url){ }`*
-    - `file` the path to the Coalesce compatible module you want to map the request to. *`''`*
+- `run` an array of paths you want to run when the server spins up. *`[]`*
+- `hook` some special hooks for debugging purposes that will get embedded into Coalesce such as:
+	- `pre` a function which gets called at the beginning of every request. Good for any global request monitoring, like `console.log`ing the `req.url` for logging purposes. *`function(req,res){ }`*
+	- `aft` a function which gets called after the request is handled. *`function(req,res){ }`*
+	- `err` a function which gets called in case the static server encounters an error. *`function(req,res){ }`*
 - `com` the SockJS config options object, see SockJS's docs.
 
 **miscellaneous:**
 
 - `no_global_theory_src` prevents auto linking and caching Theory for global server side reference as well as client side HTML reference. *`false`*
-- `spawn_within` the millisecond timeout of how long a request should wait for a module to auto deploy itself and intercept the request before Coalesce hands it to the static server. *`3000`*
+- `impatient` the millisecond timeout of how long a request should wait for a module to auto deploy itself and intercept the request before Coalesce hands it to the static server. *`3000`*
 
 Example:
 ```
 var Coalesce = require('coalesce')
 	,opt = {};
 
-opt.port = 7777;
+opt.port = 8888;
 opt.sec = { relay: true };
-opt.pre = function(req,res){
+opt.hook = { pre: function(req,res){
 	console.log(req.url);
-}
-opt.spawn_within = 5*1000;
+}}
+opt.impatient = 5*1000;
 opt.com = {
 	log: function(level, m){
 		if(level === 'error') 
@@ -338,14 +332,19 @@ console.log("Coalesce @ "+ opt.port);
 
 ### Module Options ###
 
-- `state` the path, in dot notation, to the function in your module which will intercept HTTP requests. *`''`*
+- `state` the state object, for intercepting HTTP requests, as detailed in the examples. *`{}`*
     - `m.what.headers` are the default headers from the request.
+    - `m.what.method` whether 'post' or 'get' etc., always lower case.
     - `m.what.url` is an object concerning the URL.
-    - `m.what.cookies` is the cookie object from the request. To set your own cookie, just add a property, like `m.what.cookies.name = 'val'`. The '$' prefix symbol allows you to add options to your cookie, like `m.what.cookies.$name = {httpOnly: true, 'Max-Age': 99999}`.
+    - `m.what.cookies` is the cookie object from the request. To set your own cookie, just add a property, like `m.what.cookies.name = 'value'`. Or if you want to add options, do `m.what.cookies.name = {value: 'value', httpOnly: true, 'Max-Age': 99999}` instead.
+    - `m.what.form` if a form happened to be submitted, this is it.
+    - `m.what.files` if files were uploaded, this is where you deal with them.
     - `m.what.body` assign anything to this, and it will become the body of the response.
     - `m.what.type` allows you to set the Content-Type.
     - `m.what.encoding` to set the Content-Encoding.
-	- `m.what.redirect` to redirect to another URL.
+    - `m.what.cache` use `0` for forcing no cache, or manually provide a cache control value.
+    - `m.what.status` in case you need to set an explicit status code.
+    - `m.what.redirect` to redirect to another URL.
 - `invincible` a boolean as to whether you want this module to respawn server side, in case it crashes. *`false`*
 
 Example:
@@ -369,4 +368,6 @@ Obviously this is still under development, and my todo list is huge. Immediately
 
 Here is to the future, help me create it! In the meanwhile, please experiment and play with it, and join me!
 
-*Note:* A couple bits of this documentation are out of date, if you run into any problems or if anything is confusing or not easy please let me know. I'll help you and then make sure to clarify and update things. Thanks!
+*Note:* If you run into any problems or if anything is confusing or not easy please let me know. I'll help you and then make sure to clarify and update things. Thanks!
+
+Crafted with love by Mark Nadal, whom is not responsible for any liabilities from the use of this code.
