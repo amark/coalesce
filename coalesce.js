@@ -11,7 +11,7 @@ module.exports=require('theory')((function(){
 		,'https'
 		,'child_process'
 	];
-	web.init = (function(a){ // TODO: BUG: NEED TO UPDATE DOCUMENTATION TO CURRENT VERSION!!!!!
+	web.init = (function(a){
 		function web(opt){
 			return web.configure(opt);
 		} var	fs = a.fs
@@ -254,7 +254,7 @@ module.exports=require('theory')((function(){
 								} else {
 									res.setHeader('Cache-Control', m.what.cache);
 								}
-							} web.cookie.set(res,m.what.cookies||req.cookies); // on login, pragma to no-cache (?)
+							} web.cookie.set(res,m.what.cookies||req.cookies);
 							if(m.what.status !== undefined){
 								res.statusCode = m.what.status;
 							} if(m.what.redirect !== undefined){
@@ -392,7 +392,7 @@ module.exports=require('theory')((function(){
 						c.tid = {value: c.tid.value || c.sid.tal || c.tid, HttpOnly:false};
 					}
 				}
-				c = a.obj(c).each(function(v,i,t){ // TODO: Update documentation to reflect the new API. No more $cookie, just cookie = {value: 'blah', path: '/'}
+				c = a.obj(c).each(function(v,i,t){
 					if(a.text.is(v)){
 						v = {value: v};
 					} if(a.obj.is(v)){
