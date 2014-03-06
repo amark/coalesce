@@ -3,6 +3,8 @@ Coalesce
 
 _Fuses your code into an emergent superstructure._
 
+[![The Tech Talk](http://dl.dropboxusercontent.com/u/4374976/screenshots/coalesce.png)](http://vimeo.com/85853754)
+
 As simple as:
 ```
 npm install coalesce && node -e "require('coalesce')({port:8888, sec: -2})"
