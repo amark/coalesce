@@ -1,7 +1,7 @@
 module.exports=require('theory')((function(){
 	var web = {};
 	web.name = 'web';
-	web.version = 1.8;
+	web.version = 1.9;
 	web.author = 'Mark';
 	web.dependencies = [
 		'fs'
@@ -286,7 +286,7 @@ module.exports=require('theory')((function(){
 						to.count++;
 						return;
 					} else
-					if(a[way]){ // TODO: BUG: Warning this is a no-joke condition! It is now on bottom, but should still think about bug edge cases like "test".
+					if(a[way]){ // TODO: Warning this is a no-joke condition! It is now on bottom, but should still think about bug edge cases like "test".
 						a(a(m,'how.way')+'->')(m);
 						return;
 					}else{
@@ -299,7 +299,8 @@ module.exports=require('theory')((function(){
 					m.where.at = m.where.on||m.where.off||m.where.at;
 					delete m.where.on;
 					delete m.where.off;
-					return web.event.emit(m.where.at,m);
+					web.event.emit(m.where.at,m);
+					return;
 				}
 				if((con = state.con.s[m.who.to||'']) && con.writable){
 					return con.write(a.text(state.con.clean(m)).ify());
@@ -391,7 +392,7 @@ module.exports=require('theory')((function(){
 						c.tid = {value: c.tid.value || c.sid.tal || c.tid, HttpOnly:false};
 					}
 				}
-				c = a.obj(c).each(function(v,i,t){ // TODO: BUG: Update documentation to reflect the new API. No more $cookie, just cookie = {value: 'blah', path: '/'}
+				c = a.obj(c).each(function(v,i,t){ // TODO: Update documentation to reflect the new API. No more $cookie, just cookie = {value: 'blah', path: '/'}
 					if(a.text.is(v)){
 						v = {value: v};
 					} if(a.obj.is(v)){
@@ -420,14 +421,12 @@ module.exports=require('theory')((function(){
 						return fn(true);
 					} if(m.who.tid){
 						// GETEX REDIS HERE
-						
-						var s, t = a.time.is(), w;
+						var s, t = a.time.is(), w, ws;
 						if(s = cookie.tryst[m.who.tid]){
 							web.state.con.s[req.tid = m.who.tid] = req;
 							req.sid = m.who.sid = s.sid;
-							
-							if((w = a.text(m.how.way).clip('.',0,1)) && (w+='.'+a(web.run.on,w+'.meta.stream.on'))){
-								var n = a.com.meta({what:s,who:m.who,how:{way:w,web:'stream'},where:{pid:0}});
+							if((w = a.text(m.how.way).clip('.',0,1)) && (ws=a(web.run.on,w+'.meta.stream.on'))){
+								var n = a.com.meta({what:s,who:m.who,how:{way:(w+='.'+ws),web:'stream'},where:{pid:0}});
 								n.what.data = m.what;
 								web.reply(n,function(n){
 									delete n.who.to;
@@ -590,7 +589,7 @@ module.exports=require('theory')((function(){
 						delete event.w[i];
 					}
 				});
-				return;
+				return event.w[w];
 			});
 			event.on = (function(w,c){
 				if(!w) return {};

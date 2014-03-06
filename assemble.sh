@@ -3,6 +3,7 @@
 #where $USER and $IP is the default username and IP of your remote Ubuntu 12.04 machine:
 #scp assemble.sh $USER@$IP:/home/$USER/ && ssh $USER@$IP 'bash ./assemble.sh'
 
+#NODE=http://nodejs.org/dist/v0.8.15/node-v0.8.15-linux-x64.tar.gz #binary
 NODE=http://nodejs.org/dist/v0.8.15/node-v0.8.15.tar.gz
 MONGO=http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-2.4.1.tgz
 REDIS=http://redis.googlecode.com/files/redis-2.6.6.tar.gz
@@ -32,6 +33,7 @@ if [ -e /usr/local/bin/node ];
 then
 	echo "node already installed."
 else
+	#TODO: REPLACE THE FOLLOWING BUILD WITH NAVE INSTEAD, TO MAKE THINGS FAST!
 	echo "installing node"
 	wget -O node.tar.gz $NODE
 	mkdir node
@@ -183,7 +185,7 @@ http.createServer(function (req, res) {
 	echo "====== END LOCAL ======"
 	echo "#!/bin/sh
 sudo stop theory
-GIT_WORK_TREE=/usr/local/bin/theory/code git checkout -f	
+GIT_WORK_TREE=/usr/local/bin/theory/code git checkout -f
 sudo start theory
 echo 'deployed'" > hooks/post-receive
 	chmod +x hooks/post-receive
@@ -213,12 +215,12 @@ set httpd port 8080 and
 	sudo mv monitrc /etc/monit/
 	
 	sudo echo "check host theory_init with address 127.0.0.1
-	start program = '/sbin/start theory'
-	stop program  = '/sbin/stop theory'
-	if failed port 80 protocol HTTP
-		request /
-		with timeout 2 seconds
-		then restart
+start program = '/sbin/start theory'
+stop program  = '/sbin/stop theory'
+if failed port 80 protocol HTTP
+	request /
+	with timeout 2 seconds
+	then restart
 " > theory
 	sudo mv theory /etc/monit/conf.d/
 	sudo chown -fR ubuntu ~/theory

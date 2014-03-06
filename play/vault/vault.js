@@ -42,7 +42,7 @@ module.exports=require('theory')((function(){
 				m = a.com.meta(m,w);
 				m.where = m.where||{on:'vault'};
 				m.who = m.who||{};
-				if(v.id) m.who.id = v.id;
+				if(v.id) m.who.via = v.id;
 				m.who.from = v.cid;
 				a.com(w).send(m);
 				return m;
@@ -55,7 +55,7 @@ module.exports=require('theory')((function(){
 				m = a.com.meta(m,w);
 				m.where = m.who.from;
 				m.who = m.who||{};
-				if(v.id) m.who.id = v.id;
+				if(v.id) m.who.via = v.id;
 				m.who.from = v.cid;
 				a.com(w).send(m);
 			});
@@ -74,7 +74,7 @@ module.exports=require('theory')((function(){
 				v.onlive(m);
 				var vs = _.store('vault'), d;
 				if(!(m.what=vs[m.what])) return;
-				console.log("Retrieving "+m.what.id+"'s data.");
+				console.log("Retrieving "+m.what.via+"'s data.");
 				v.com('.is').reply(m);
 				return;
 			}
@@ -147,9 +147,9 @@ module.exports=require('theory')((function(){
 					+".");
 					return;
 				}
-				console.log('Saving '+m.who.id+"'s data.");
+				console.log('Saving '+m.who.via+"'s data.");
 				v.store = _.store('vault');
-				v.store[m.who.id] = {when:m.when,data:m.what,id:m.who.id};
+				v.store[m.who.via] = {when:m.when,data:m.what,via:m.who.via};
 				_.store('vault',v.store);
 				m.what = {OK:1};
 				v.com.reply(m);
