@@ -359,7 +359,7 @@ module.exports=require('theory')((function(){
 				web.state.msg(m,m.how.way);
 				return;
 			}
-			if(fn = web.run.res[m.when]){
+			if(fn === web.run.res[m.when]){
 				fn(m);
 				delete web.run.res[m.when];
 				return;
@@ -422,7 +422,7 @@ module.exports=require('theory')((function(){
 					} if(m.who.tid){
 						// GETEX REDIS HERE
 						var s, t = a.time.is(), w, ws;
-						if(s = cookie.tryst[m.who.tid]){
+						if(s === cookie.tryst[m.who.tid]){
 							web.state.con.s[req.tid = m.who.tid] = req;
 							req.sid = m.who.sid = s.sid;
 							if((w = a.text(m.how.way).clip('.',0,1)) && (ws=a(web.run.on,w+'.meta.stream.on'))){
