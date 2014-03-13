@@ -19,7 +19,7 @@ module.exports=require('theory')((function(){
 		,	URL = a.url;
 		web.opt = {};
 		web.configure = (function(opt){
-			if(opt.how){ return }
+			if(opt.how){ return; }
 			module.reqdir = a.path.dirname((module.parent||{}).filename);
 			opt = a.obj.is(opt)? opt : {};
 			opt.host = opt.host||'localhost';
@@ -35,8 +35,8 @@ module.exports=require('theory')((function(){
 				opt.sec = {};
 			}
 			opt.session = opt.session||{};
-			opt.session.sid = opt.session.sid||(function(){ return a.text.random(16) });
-			opt.session.tid = opt.session.tid||(function(){ return a.text.random(16) });
+			opt.session.sid = opt.session.sid||(function(){ return a.text.random(16); });
+			opt.session.tid = opt.session.tid||(function(){ return a.text.random(16); });
 			opt.session.expire = opt.session.expire||1000*60*60*24*7*4;
 			opt.session.wait = opt.session.wait||1000*60*2;
 			opt.cache = opt.cache||{};
@@ -77,7 +77,7 @@ module.exports=require('theory')((function(){
 				}
 				state.on.addListener('request',state.req);
 				state.on.addListener('upgrade',function(req,res){
-					if(state.sent(res)){ return }
+					if(state.sent(res)){ return; }
 					res.end();
 				});
 				state.on.listen(web.opt.port);
@@ -91,18 +91,18 @@ module.exports=require('theory')((function(){
 			,	sock = require('sockjs');
 			state.ways = [];
 			state.sort = (function(A,B){
-				if(!A || !B){ return 0 }
+				if(!A || !B){ return 0; }
 				A = A.flow; B = B.flow;
-				if(A < B){ return -1 }
-				else if(A > B){ return  1 }
-				else { return 0 }
+				if(A < B){ return -1; }
+				else if(A > B){ return  1; }
+				else { return 0; }
 			});
 			state.map = (function(req,map){
 				var url = req.url || url;
 				map = map || state.ways;
 				return a.list(map).each(function(v,i){
-					if(!a.obj.is(v)){ return }
-					if(v.flow < (req.flow||-Infinity)){ return }
+					if(!a.obj.is(v)){ return; }
+					if(v.flow < (req.flow||-Infinity)){ return; }
 					v.params = v.params || [];
 					if(a.text.is(v.match)){
 						v.regex = state.regex(v);
@@ -115,7 +115,7 @@ module.exports=require('theory')((function(){
 							return v;
 						}
 					} if(a.fns.is(v.match)){
-						if(v.match(url)){ return v}
+						if(v.match(url)){ return v; }
 					}
 				})||{flow:Infinity,on:state.err};
 				return (0 <= r.flow && (fs.existsSync||path.existsSync)(url.file))?
@@ -159,7 +159,7 @@ module.exports=require('theory')((function(){
 				} catch(e){ console.log("something has gone expressively wrong."); }
 			});
 			state.sent = (function(res){
-				if(res.headerSent) { return true }
+				if(res.headerSent) { return true; }
 			});
 			state.url = (function(req){
 				var url = a.obj.is(req.url)? req.url : URL.parse(req.url,true);
@@ -176,10 +176,10 @@ module.exports=require('theory')((function(){
 			state.err = (function(req,res){
 				web.cookie.set(res,req.cookies);
 				state.dir.serve(req,res,function(e,r){
-					if(!e){ return web.opt.hook.aft(req,res) }
-					if(!req.flow){ return state.req(req,res,++req.flow) }
-					if(web.opt.hook.err(req,res,e,r)){ return }
-					if(state.sent(res)){ return }
+					if(!e){ return web.opt.hook.aft(req,res); }
+					if(!req.flow){ return state.req(req,res,++req.flow); }
+					if(web.opt.hook.err(req,res,e,r)){ return; }
+					if(state.sent(res)){ return; }
 					res.writeHead(e.status, e.headers);
 					res.end();
 				});
@@ -189,7 +189,7 @@ module.exports=require('theory')((function(){
 				,match: '*'
 				,flow: 0
 				,on: state.err
-			})
+			});
 			state.req = (function(req,res){
 				req.url = state.url(req);
 				req.file = state.file(req);
@@ -198,8 +198,8 @@ module.exports=require('theory')((function(){
 				req.cookies = web.cookie.parse(req);
 				req.cookies.sid = req.cookies.sid || web.opt.session.sid();
 				web.opt.hook.pre(req,res);
-				if(web.theorize(req,res)){ return }
-				if(req.flow === Infinity){ return state.err(req,res) }
+				if(web.theorize(req,res)){ return; }
+				if(req.flow === Infinity){ return state.err(req,res); }
 				a.fns.flow([function(next){
 					web.run.it({
 						file: req.map.file || req.file
@@ -215,14 +215,14 @@ module.exports=require('theory')((function(){
 								form.on('field',function(k,v){
 									req.form[k] = v;
 								}).on('file',function(k,v){
-									if(!req.files[k]){ req.files[k] = [] }
+									if(!req.files[k]){ req.files[k] = []; }
 									(req.files[k]||[]).push(v);
 								}).on('error',function(e){
 									console.log("formidable error:",e);
-									if(form.done){ return }
+									if(form.done){ return; }
 									next(form.done = v);
 								}).on('end', function(){
-									if(form.done){ return }
+									if(form.done){ return; }
 									next(form.done = v);
 								});
 								return form.parse(req);
@@ -260,14 +260,14 @@ module.exports=require('theory')((function(){
 							} if(m.what.redirect !== undefined){
 								res.setHeader('Location', m.what.redirect);
 								res.statusCode = m.what.status || 302;
-								if(state.sent(res)){ return }
+								if(state.sent(res)){ return; }
 								return res.end();
 							} if(m.what.body !== undefined){
-								if(state.sent(res)){ return }
+								if(state.sent(res)){ return; }
 								res.end(a.text.is(m.what.body)?m.what.body:a.text.ify(m.what.body));
 								return web.opt.hook.aft(req,res);
 							} req.url.pathname = m.what.pathname||a(m.what,'url.pathname')||req.url.pathname;
-							if(req.flow === 0){ return state.err(req,res) }
+							if(req.flow === 0){ return state.err(req,res); }
 							req.flow = (m.what.flow === null)? Infinity : 
 								a.num.is(m.what.flow)? m.what.flow : (req.flow + 1);
 						} next(req,res);
@@ -328,7 +328,7 @@ module.exports=require('theory')((function(){
 				con.on('data',function(m){
 					m = a.com.meta(a.obj.ify(m),con);
 					web.cookie.tid(con,m,function(v){
-						if(!v){ return }
+						if(!v){ return; }
 						if(web.name == a.list(m.how.way.split('.')).at(1)){
 							m.how.way = '';
 						} m.where.pid = (m.where.pid === process.pid)? 0 : m.where.pid;
@@ -359,7 +359,7 @@ module.exports=require('theory')((function(){
 				web.state.msg(m,m.how.way);
 				return;
 			}
-			if(fn = web.run.res[m.when]){
+			if(fn === web.run.res[m.when]){
 				fn(m);
 				delete web.run.res[m.when];
 				return;
@@ -382,7 +382,7 @@ module.exports=require('theory')((function(){
 			});
 			cookie.set = (function(res,c,tid){
 				var h = res.getHeader('Set-Cookie') || [], m;
-				if(a.text.is(h)){ h = [h] }; c = c || {};
+				if(a.text.is(h)){ h = [h]; }; c = c || {};
 				if(c.sid){
 					c.sid = {value: c.sid.value || c.sid.val || c.sid, HttpOnly:true};
 				}
@@ -397,14 +397,14 @@ module.exports=require('theory')((function(){
 						v = {value: v};
 					} if(a.obj.is(v)){
 						i = i+'='+v.value || v.val || '';
-						m = a.obj(v).each(function(w,j,q){ q(a.text.low(j),w) })||{};
+						m = a.obj(v).each(function(w,j,q){ q(a.text.low(j),w); })||{};
 						m.httponly = a.obj(m).has('httponly')? m.httponly : true;
 						m.path = m.path || '/'; 
-						if(m.path){ i += "; path=" + m.path }
-						if(m.expires){ i += "; expires=" + m.expires }
-						if(m.domain){ i += "; domain=" + m.domain }
-						if(m.secure){ i += "; secure" }
-						if(m.httponly){ i += "; HttpOnly" }
+						if(m.path){ i += "; path=" + m.path; }
+						if(m.expires){ i += "; expires=" + m.expires; }
+						if(m.domain){ i += "; domain=" + m.domain; }
+						if(m.secure){ i += "; secure"; }
+						if(m.httponly){ i += "; HttpOnly"; }
 						t(i);
 					}
 				})||[];
@@ -422,7 +422,7 @@ module.exports=require('theory')((function(){
 					} if(m.who.tid){
 						// GETEX REDIS HERE
 						var s, t = a.time.is(), w, ws;
-						if(s = cookie.tryst[m.who.tid]){
+						if(s === cookie.tryst[m.who.tid]){
 							web.state.con.s[req.tid = m.who.tid] = req;
 							req.sid = m.who.sid = s.sid;
 							if((w = a.text(m.how.way).clip('.',0,1)) && (ws=a(web.run.on,w+'.meta.stream.on'))){
@@ -442,7 +442,7 @@ module.exports=require('theory')((function(){
 								fn(true);
 							}
 						} else {
-							if(web.opt.sec.incognito){ req.sid = req.tid = m.who.tid; fn(true) }
+							if(web.opt.sec.incognito){ req.sid = req.tid = m.who.tid; fn(true); }
 						} delete cookie.tryst[m.who.tid];
 						a.obj(cookie.tryst).each(function(v,i){
 							if(web.opt.session.wait < t - v.ts){
@@ -463,7 +463,7 @@ module.exports=require('theory')((function(){
 								t(i, v || '');
 							} 
 						})
-					}
+					};
 					return req.cookies;
 				}
 			});
@@ -471,7 +471,7 @@ module.exports=require('theory')((function(){
 		})();
 		web.run = (function(){
 			function run($){
-				if(!$){ return web }
+				if(!$){ return web; }
 				if(!a.list.is($)){
 					$ = [$];
 				} a.list($).each(function(v,i,t){
@@ -490,33 +490,33 @@ module.exports=require('theory')((function(){
 			run.on = {};
 			run.res = {};
 			run.it = (function(m,fn){
-				if(!m){ return }
+				if(!m){ return; }
 				var opt = m.what || m
 					, way = opt.way = web.state.way(opt.file);
-				if(way === theory.name){ return fn(false) }
-				if(opt.file == (module.parent||{}).filename){ return fn(false) }
-				if(!a.text.find.js.test(opt.file)){ return fn(false) } // ? why again ?
-				if(!(fs.existsSync||path.existsSync)(opt.file)){ return fn(false) }
+				if(way === theory.name){ return fn(false); }
+				if(opt.file == (module.parent||{}).filename){ return fn(false); }
+				if(!a.text.find.js.test(opt.file)){ return fn(false); } // ? why again ?
+				if(!(fs.existsSync||path.existsSync)(opt.file)){ return fn(false); }
 				if(!opt.respawn && run.on[way]){
-					if(a(run.on,way+'.meta.state')){ return fn(true) } // change API
+					if(a(run.on,way+'.meta.state')){ return fn(true); } // change API
 					return fn(false);
 				}
-				console.log("RUN :-->"+" testing "+opt.file)
+				console.log("RUN :-->"+" testing "+opt.file);
 				var ts = a.time.is()
 					, p = fork(opt.file,[],{env:process.env})
 					, gear = run.on[way] || (run.on[way]={meta:{},cogs:{}})
-					, cog = gear.cogs[p.pid] = {com:p, pid:p.pid, start:ts, count:0}
+					, cog = gear.cogs[p.pid] = {com:p, pid:p.pid, start:ts, count:0};
 				gear.meta.invincible = opt.invincible;
 				p.on('message',function(m){
 					m = a.obj.ify(m);
 					if(a(m,'onOpen.readyState')===1){
 						a.time.stop(opt.impatient);
-						if(m && m.mod && m.mod.state){ m.mod.state.file = opt.file }
-						else { fn(0); fn = function(){} }
+						if(m && m.mod && m.mod.state){ m.mod.state.file = opt.file; }
+						else { fn(0); fn = function(){}; }
 						gear.meta = a.obj(m.mod).u(gear.meta);
 						web.state.ways.push(a(m,'mod.state'));
 						web.state.ways.sort(web.state.sort);
-						opt.invincible = gear.meta.invincible
+						opt.invincible = gear.meta.invincible;
 						run.track(opt,opt.reply);
 						fn(p.pid||true); fn = function(){};
 						return;
@@ -540,14 +540,14 @@ module.exports=require('theory')((function(){
 					delete cog.com; cog.com = {send:function(){}};
 					console.log("RUN :-->"+" exit: "+d+" >> "+way+" survived "+(cog.end - cog.start)/1000+" seconds. >> exit: "+e);
 				});
-				if(opt.respawn){ return }
+				if(opt.respawn){ return; }
 				opt.impatient = a.time.wait(function(){
 					fn(false); fn = function(){};
 				},web.opt.run.impatient);
 			});
 			run.tracked = {};
 			run.track = (function(opt,cb){ // depreciate
-				if(run.tracked[opt.way||opt.file]){ return }
+				if(run.tracked[opt.way||opt.file]){ return; }
 				fs.watchFile(opt.file,function(c,o){
 					opt.respawn = true;
 					run.it(opt,(function(p){
@@ -617,7 +617,7 @@ module.exports=require('theory')((function(){
 					req.cookies = web.cookie.tid(req);
 					if(!web.opt.no_global_theory_src){
 						web.cookie.set(res,req.cookies,req.cookies.tid);
-						if(web.state.sent(res)){ return }
+						if(web.state.sent(res)){ return; }
 						res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8' });
 						res.end(a.theory_js,'utf-8');
 						return true;
@@ -628,7 +628,7 @@ module.exports=require('theory')((function(){
 				if(	(fs.existsSync||path.existsSync)(module.reqdir+'/node_modules') && 
 					(fs.existsSync||path.existsSync)(__dirname+'/node_modules/theory') &&
 					!(fs.existsSync||path.existsSync)(module.reqdir+'/node_modules/theory')){
-					fs.mkdirSync(module.reqdir+'/node_modules/theory')
+					fs.mkdirSync(module.reqdir+'/node_modules/theory');
 					fs.writeFileSync(module.reqdir+'/node_modules/theory/index.js'
 						,"module.exports=require('"
 						+path.relative(module.reqdir+'/node_modules/theory'
