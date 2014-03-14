@@ -277,11 +277,15 @@ module.exports=require('theory')((function(){
 			state.msg = (function(m,opt,con){
 				if(!a.obj.is(m)) return;
 				var way = a(m,'how.way')||a(m,'way')||''
-					,opt = opt||{};
+					,opt = opt||{}, g, t;
 				way = a.text(way).clip('.',0,1);
 				if(opt != way){
-					if(web.run.on[way] && !a(web.run.on,way+'.meta.fatal')){
+					if(web.run.on[way] && (g = web.run.on[way].meta) && !g.fatal){
 						var to = web.run.to(way);
+						if(way !== g.name){
+							t = m.how && m.how.way? m.how : m;
+							t.way = t.way.replace(way, g.name);
+						}
 						to.com && to.com.send && to.com.send(m);
 						to.count++;
 						return;
