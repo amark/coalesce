@@ -12,6 +12,7 @@ module.exports=require('theory')((function(){
 		,'child_process'
 	];
 	web.init = (function(a){
+		console.log("yay coalesce!");
 		function web(opt){
 			return web.configure(opt);
 		} var	fs = a.fs
@@ -57,6 +58,8 @@ module.exports=require('theory')((function(){
 			opt.hook.aft = opt.hook.aft||(function(){});
 			opt.hook.err = opt.hook.err||(function(){});
 			opt.hook.reply = opt.hook.reply||(function(){});
+			opt.node = opt.node||{};
+			opt.node.mid = opt.node.mid || a.text.r(16);
 			web.opt = a.obj(opt).u(web.opt||{});
 			web.theorize();
 			web.run(opt.run.is);
@@ -83,11 +86,30 @@ module.exports=require('theory')((function(){
 				state.on.listen(web.opt.port);
 				state.com.on('connection',state.con);
 				state.com.installHandlers(state.on,web.opt.com);
+				if(web.opt.node && web.opt.node.src){
+					if(!a.list.is(web.opt.node.src)){
+						web.opt.node.src = [web.opt.node.src];
+					}
+					a.list(web.opt.node.src).each(function(url){
+						var toe = toes.create(url);
+						web.node.cons[url] = toe;
+						toe.on('connection', function(){
+							toe.writable = true;
+							toe.mid = url;
+							toe.write(a.text.ify(a.com.meta({
+								what: {auth: web.opt.node.key, to: url}
+								,where: {mid: web.opt.node.mid}
+							})));
+							state.con(toe);
+						});
+					});
+				}
 				return web;
 			}
 			var mime = require('mime')
 			, 	ns = require('node-static')
 			, 	formidable = require('formidable')
+			,	toes = require('sockjs-client')
 			,	sock = require('sockjs');
 			state.ways = [];
 			state.sort = (function(A,B){
@@ -283,7 +305,7 @@ module.exports=require('theory')((function(){
 					if(web.run.on[way] && (g = web.run.on[way].meta) && !g.fatal){
 						var to = web.run.to(way);
 						if(way !== g.name){
-							t = m.how && m.how.way? m.how : m;
+							t = (m.how && m.how.way) || m;
 							t.way = t.way.replace(way, g.name);
 						}
 						to.com && to.com.send && to.com.send(m);
@@ -304,11 +326,16 @@ module.exports=require('theory')((function(){
 					delete m.where.on;
 					delete m.where.off;
 					web.event.emit(m.where.at,m);
+					// toes should go here too!
 					return;
 				}
-				if((con = state.con.s[m.who.to||'']) && con.writable){
-					return con.write(a.text(state.con.clean(m)).ify());
+				if((con = state.con.s[m.who.to]) && con.writable){
+					return con.write(a.text.ify(state.con.clean(m)));
 				}
+				a.obj(web.node.cons).each(function(con){ // distinguish between 'reply' and 'send'!
+					if(!con || !con.write){ return }
+					con.write(a.text.ify(m));
+				});
 			});
 			state.sub = (function(m,opt,con){
 				if(	!a.obj.is(m) || !a.obj.is(m.where) ||
@@ -327,10 +354,10 @@ module.exports=require('theory')((function(){
 			});
 			state.con = (function(con){
 				con.hear = {};
-				state.con.s = state.con.s||{};
 				state.con.s[con.id] = con;
 				con.on('data',function(m){
 					m = a.com.meta(a.obj.ify(m),con);
+					if(web.node.auth(con,m)){ return }
 					web.cookie.tid(con,m,function(v){
 						if(!v){ return }
 						if(web.name == a.list(m.how.way.split('.')).at(1)){
@@ -345,8 +372,15 @@ module.exports=require('theory')((function(){
 						web.event.off(v);
 					});
 					delete state.con.s[con.id];
+					if(con.mid){
+						delete web.node.cons[con.mid];
+					}
+				});
+				con.on('error', function(e){ // TODO: if mid try to reconnect!
+					console.log('con error', e);
 				});
 			});
+			state.con.s = {};
 			state.con.clean = (function(m){
 				if(!m) return {};
 				m.who = {tid:m.who.tid,sid:m.who.sid
@@ -416,6 +450,9 @@ module.exports=require('theory')((function(){
 			});
 			cookie.tid = (function(req,m,fn){
 				if(fn){
+					if(req.mid){
+						return fn(true);
+					}
 					if(req.sid || req.tid){
 						m.who = a.obj(req.who||{}).u(m.who);
 						m.how = a.obj(req.how||{}).u(m.how);
@@ -473,6 +510,42 @@ module.exports=require('theory')((function(){
 			});
 			return cookie;
 		})();
+		web.node = (function(){
+			function node(){
+			
+			}
+			node.auth = function(con,m){
+				if(con.sid || con.tid){ return }
+				if(con.mid){
+					if(m.where){ m.where.mid = m.where.mid || con.mid }
+					return;
+				}
+				if(m && m.where && m.where.mid && m.what && m.what.auth){
+					console.log('node auth', m);
+					//console.log("auth machine...");
+					if(!web.opt.node || !web.opt.node.key){
+						con.close();
+						//console.log("none");
+						return true;
+					}
+					if(m.where.mid === web.opt.node.mid){
+						con.close();
+						//console.log("self");
+						return true;
+					}
+					if(m.what.auth === web.opt.node.key){
+						con.mid = m.where.mid;
+						web.node.cons[con.mid] = con;
+						//console.log("machine auth success");
+						return true;
+					}
+					con.close();
+					return true;
+				}
+			}
+			node.cons = {};
+			return node;
+		})();
 		web.run = (function(){
 			function run($){
 				if(!$){ return web }
@@ -518,13 +591,16 @@ module.exports=require('theory')((function(){
 						if(m && m.mod && m.mod.state){ m.mod.state.file = opt.file }
 						else { fn(0); fn = function(){} }
 						gear.meta = a.obj(m.mod).u(gear.meta);
+						if(gear.meta && gear.meta.name){
+							run.on[gear.meta.name] = gear;
+						}
 						web.state.ways.push(a(m,'mod.state'));
 						web.state.ways.sort(web.state.sort);
 						opt.invincible = gear.meta.invincible
 						run.track(opt,opt.reply);
 						fn(p.pid||true); fn = function(){};
 						return;
-					} opt.reply(m,way);
+					} opt.reply(m,(gear.meta&&gear.meta.name)||way);
 				});
 				p.on('exit',function(d,e){
 					if(cog.end){
