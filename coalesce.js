@@ -12,7 +12,6 @@ module.exports=require('theory')((function(){
 		,'child_process'
 	];
 	web.init = (function(a){
-		console.log("yay coalesce!");
 		function web(opt){
 			return web.configure(opt);
 		} var	fs = a.fs
@@ -43,6 +42,7 @@ module.exports=require('theory')((function(){
 			opt.cache = opt.cache||{};
 			opt.cache.age = opt.cache.age||0;
 			opt.com = opt.com||{};
+			opt.com.log = opt.com.log || function(w,m){};
 			opt.com.prefix = opt.com.prefix||'/com';	
 			opt.com.url = opt.com.url||"http"+((opt.sec.key&&opt.sec.cert)?'s':'')+"://"
 				+opt.host+(opt.port?':'+opt.port:'')
@@ -83,7 +83,7 @@ module.exports=require('theory')((function(){
 					if(state.sent(res)){ return }
 					res.end();
 				});
-				state.on.listen(web.opt.port);
+				state.on.listen(web.opt.port, web.opt.host);
 				state.com.on('connection',state.con);
 				state.com.installHandlers(state.on,web.opt.com);
 				if(web.opt.node && web.opt.node.src){
@@ -93,6 +93,7 @@ module.exports=require('theory')((function(){
 					a.list(web.opt.node.src).each(function(url){
 						var toe = toes.create(url);
 						web.node.cons[url] = toe;
+						toe.on('error', function(e){ console.log('ut-oh', e) }); // need to add this before the connection event.
 						toe.on('connection', function(){
 							toe.writable = true;
 							toe.mid = url;
@@ -299,14 +300,13 @@ module.exports=require('theory')((function(){
 			state.msg = (function(m,opt,con){
 				if(!a.obj.is(m)) return;
 				var way = a(m,'how.way')||a(m,'way')||''
-					,opt = opt||{}, g, t;
+					,opt = opt||{}, g;
 				way = a.text(way).clip('.',0,1);
 				if(opt != way){
 					if(web.run.on[way] && (g = web.run.on[way].meta) && !g.fatal){
 						var to = web.run.to(way);
-						if(way !== g.name){
-							t = (m.how && m.how.way) || m;
-							t.way = t.way.replace(way, g.name);
+						if(way !== g.name && m && m.how && m.how.way){
+							m.how.way = m.how.way.replace(way, g.name);
 						}
 						to.com && to.com.send && to.com.send(m);
 						to.count++;
@@ -315,8 +315,7 @@ module.exports=require('theory')((function(){
 					if(a[way]){ // TODO: Warning this is a no-joke condition! It is now on bottom, but should still think about bug edge cases like "test".
 						a(a(m,'how.way')+'->')(m);
 						return;
-					}else{
-					}
+					}else{}
 					if(!web.opt.sec.relay){
 						return;
 					}
@@ -332,7 +331,7 @@ module.exports=require('theory')((function(){
 				if((con = state.con.s[m.who.to]) && con.writable){
 					return con.write(a.text.ify(state.con.clean(m)));
 				}
-				a.obj(web.node.cons).each(function(con){ // distinguish between 'reply' and 'send'!
+				a.obj(web.node.cons).each(function(con,i){ // distinguish between 'reply' and 'send'!
 					if(!con || !con.write){ return }
 					con.write(a.text.ify(m));
 				});
@@ -525,18 +524,18 @@ module.exports=require('theory')((function(){
 					//console.log("auth machine...");
 					if(!web.opt.node || !web.opt.node.key){
 						con.close();
-						//console.log("none");
+						console.log("none");
 						return true;
 					}
 					if(m.where.mid === web.opt.node.mid){
 						con.close();
-						//console.log("self");
+						console.log("self");
 						return true;
 					}
 					if(m.what.auth === web.opt.node.key){
 						con.mid = m.where.mid;
 						web.node.cons[con.mid] = con;
-						//console.log("machine auth success");
+						console.log("machine auth success");
 						return true;
 					}
 					con.close();
