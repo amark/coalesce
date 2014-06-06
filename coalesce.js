@@ -11,14 +11,15 @@ module.exports=require('theory')((function(){
 		,'https'
 		,'child_process'
 	];
-	web.init = (function(a){
+	web.init = function(a){
+		console.log("THIS IS NOT A STABLE VERSION OF COALESCE, USE A STABLE VERSION (v0.1.8)!!!! fox");
 		function web(opt){
 			return web.configure(opt);
-		} var	fs = a.fs
+		} var fs = a.fs
 		,	path = a.path
 		,	URL = a.url;
 		web.opt = {};
-		web.configure = (function(opt){
+		web.configure = function(opt){
 			if(opt.how){ return }
 			module.reqdir = a.path.dirname((module.parent||{}).filename);
 			opt = a.obj.is(opt)? opt : {};
@@ -62,10 +63,10 @@ module.exports=require('theory')((function(){
 			opt.node.mid = opt.node.mid || a.text.r(16);
 			web.opt = a.obj(opt).u(web.opt||{});
 			web.theorize();
-			web.run(opt.run.is);
+			web.run(opt.run.is,{invincible:true}); // TODO: Allow init.js to run 'home.js' which requires 'sign.js' which is a coalesce route.
 			web.state();
 			return web;
-		});
+		};
 		a.text.find.js = /\.js$/i;
 		web.state = (function(){
 			function state($){
@@ -113,14 +114,14 @@ module.exports=require('theory')((function(){
 			,	toes = require('sockjs-client')
 			,	sock = require('sockjs');
 			state.ways = [];
-			state.sort = (function(A,B){
+			state.sort = function(A,B){
 				if(!A || !B){ return 0 }
 				A = A.flow; B = B.flow;
 				if(A < B){ return -1 }
 				else if(A > B){ return  1 }
 				else { return 0 }
-			});
-			state.map = (function(req,map){
+			};
+			state.map = function(req,map){
 				var url = req.url || url;
 				map = map || state.ways;
 				return a.list(map).each(function(v,i){
@@ -143,8 +144,8 @@ module.exports=require('theory')((function(){
 				})||{flow:Infinity,on:state.err};
 				return (0 <= r.flow && (fs.existsSync||path.existsSync)(url.file))?
 					url.file : r.file || url.file;
-			});
-			state.regex = (function(m,r){ // via expressjs
+			};
+			state.regex = function(m,r){ // via expressjs
 				try{
 				var path = m.match, keys = m.params||[], params = {}, sensitive, strict;
 				if(r){ m = r; 
@@ -180,23 +181,23 @@ module.exports=require('theory')((function(){
 				.replace(/\*/g, '(.*)');
 				return new RegExp('^' + path + '$', sensitive ? '' : 'i');
 				} catch(e){ console.log("something has gone expressively wrong."); }
-			});
-			state.sent = (function(res){
+			};
+			state.sent = function(res){
 				if(res.headerSent) { return true }
-			});
-			state.url = (function(req){
+			};
+			state.url = function(req){
 				var url = a.obj.is(req.url)? req.url : URL.parse(req.url,true);
 				url.ext = url.ext || path.extname(url.pathname).replace(/^\./,'');
 				return url;
-			});
-			state.file = (function(req,dir){
+			};
+			state.file = function(req,dir){
 				return path.normalize(path.join(dir||web.opt.dir,req.url.pathname));
-			});
-			state.way = (function(req){
+			};
+			state.way = function(req){
 				var p = a.text.is(req||'')? req : (req.map.file || req.file) || '';
 				return path.basename(p,path.extname(p));
-			});
-			state.err = (function(req,res){
+			};
+			state.err = function(req,res){
 				web.cookie.set(res,req.cookies);
 				state.dir.serve(req,res,function(e,r){
 					if(!e){ return web.opt.hook.aft(req,res) }
@@ -206,14 +207,14 @@ module.exports=require('theory')((function(){
 					res.writeHead(e.status, e.headers);
 					res.end();
 				});
-			});
+			};
 			state.ways.push({
 				way: 'state'
 				,match: '*'
 				,flow: 0
 				,on: state.err
-			})
-			state.req = (function(req,res){
+			});
+			state.req = function(req,res){
 				req.url = state.url(req);
 				req.file = state.file(req);
 				req.map = state.map(req);
@@ -226,7 +227,6 @@ module.exports=require('theory')((function(){
 				a.fns.flow([function(next){
 					web.run.it({
 						file: req.map.file || req.file
-						,invincible: req.map.file
 						,reply: state.msg
 					},function(v){
 						if(v && (v=((v=state.way(req))+'.'
@@ -296,64 +296,85 @@ module.exports=require('theory')((function(){
 						} next(req,res);
 					});
 				}],state.req);
-			});
-			state.msg = (function(m,opt,con){
+			};
+			state.msg = function(m,opt,con){
 				if(!a.obj.is(m)) return;
 				var way = a(m,'how.way')||a(m,'way')||''
 					,opt = opt||{}, g;
 				way = a.text(way).clip('.',0,1);
 				if(opt != way){
-					if(web.run.on[way] && (g = web.run.on[way].meta) && !g.fatal){
-						var to = web.run.to(way);
-						if(way !== g.name && m && m.how && m.how.way){
-							m.how.way = m.how.way.replace(way, g.name);
-						}
-						to.com && to.com.send && to.com.send(m);
-						to.count++;
+					if(a[way]){ // Back on top! Careful not to name a library that overwrites a default namespace!
+						a(a(m,'how.way')+'->')(m);
 						return;
 					} else
-					if(a[way]){ // TODO: Warning this is a no-joke condition! It is now on bottom, but should still think about bug edge cases like "test".
-						a(a(m,'how.way')+'->')(m);
+					if(web.run.on[way] && (g = web.run.on[way].meta) && !g.fatal){
+						web.run.send(m,way,g);
 						return;
 					}else{}
 					if(!web.opt.sec.relay){
 						return;
 					}
 				}
-				if((con = state.sub(m)) && (m.where.on||m.where.off||m.where.at)){
+				if(m.who.to){ // direct message to someone
+					con = state.con.s[m.who.to];
+					if(con && con.writable){
+						return con.write(a.text.ify(state.con.clean(m)));
+					}
+				} else
+				if(m.where.on||m.where.off||m.where.at){ // pub/sub broadcasting
+					state.sub(m,way);
 					m.where.at = m.where.on||m.where.off||m.where.at;
-					delete m.where.on;
-					delete m.where.off;
-					web.event.emit(m.where.at,m);
-					// toes should go here too!
-					return;
-				}
-				if((con = state.con.s[m.who.to]) && con.writable){
-					return con.write(a.text.ify(state.con.clean(m)));
+					if(m.where.at){
+						delete m.where.on;
+						delete m.where.off;
+						a.on(m.where.at).emit(m);
+					}
 				}
 				a.obj(web.node.cons).each(function(con,i){ // distinguish between 'reply' and 'send'!
 					if(!con || !con.write){ return }
 					con.write(a.text.ify(m));
 				});
-			});
-			state.sub = (function(m,opt,con){
-				if(	!a.obj.is(m) || !a.obj.is(m.where) ||
-					!a(m,'who.tid') || !(con = state.con.s[m.who.tid])) return;
+			};
+			state.sub = function(m,way,con){
+				if(!a.obj.is(m) || !a.obj.is(m.where) || m.where.at) return;
+				if(m.who.tid){
+					con = con || state.con.s[m.who.tid];
+				} else
+				if(way){
+					con = con || state.con.s[way];
+					if(!con){
+						con = state.con.s[way] = {
+							id: way
+							,way: way
+							,writable: true
+						}
+					}
+				}
+				if(!con){ return }
+				con.hear = con.hear || {};
+				var where = m.where.on||m.where.off||m.where.at;
 				if(m.where.off){
-					if(!con.hear[m.where.off]) return;
-					web.event.off(con.hear[m.where.off]);
-					delete con.hear[m.where.off];
-					return con;
-				} if(con.hear[m.where.on]) return con;
-				con.hear[m.where.on] = web.event.on(m.where.on,function(m){
-					if(!con.writable || con.tid == m.who.tid || !state.con.s[con.id]) return;
-					con.write(a.text.ify(state.con.clean(m)));
+					if(!con.hear[where]){ return }
+					con.hear[where].off();
+					delete con.hear[where];
+					return;
+				}
+				if(con.hear[where]){ return }
+				con.hear[where] = a.on(where).event(function(m){
+					if(!state.con.s[con.id]){ return }
+					if(con.way){
+						if(con.way === m.how.way){ return } // ?, TODO: This will need to behave differently on a multi-machine setup
+						web.run.send(m, con.way);
+					} else
+					if(con.writable){
+						if(con.tid === m.who.tid){ return }
+						con.write(a.text.ify(state.con.clean(m)));
+					}
 				});
-				return con;
-			});
-			state.con = (function(con){
+			};
+			state.con = function(con,id){
 				con.hear = {};
-				state.con.s[con.id] = con;
+				state.con.s[id||con.id] = con;
 				con.on('data',function(m){
 					m = a.com.meta(a.obj.ify(m),con);
 					if(web.node.auth(con,m)){ return }
@@ -378,16 +399,16 @@ module.exports=require('theory')((function(){
 				con.on('error', function(e){ // TODO: if mid try to reconnect!
 					console.log('con error', e);
 				});
-			});
+			};
 			state.con.s = {};
-			state.con.clean = (function(m){
+			state.con.clean = function(m){
 				if(!m) return {};
 				m.who = {tid:m.who.tid,sid:m.who.sid
 					,to:m.who.to,from:m.who.from
 					,of:m.who.of,via:m.who.via
 				};
 				return m;
-			});
+			};
 			return state;
 		})();		
 		web.reply = (function(m,fn){
@@ -407,7 +428,7 @@ module.exports=require('theory')((function(){
 				return web;
 			}
 			cookie.tryst = {};
-			cookie.parse = (function(m){
+			cookie.parse = function(m){
 				var l,p,c={};
 				if(a(m,'headers.cookie')){
 					l = m.headers.cookie.split(/\s?;\s?/ig);
@@ -416,8 +437,8 @@ module.exports=require('theory')((function(){
 						c[p[0]] = p.slice(1).join('=');
 					});
 				} return c;
-			});
-			cookie.set = (function(res,c,tid){
+			};
+			cookie.set = function(res,c,tid){
 				var h = res.getHeader('Set-Cookie') || [], m;
 				if(a.text.is(h)){ h = [h] }; c = c || {};
 				if(c.sid){
@@ -446,8 +467,8 @@ module.exports=require('theory')((function(){
 					}
 				})||[];
 				res.setHeader('Set-Cookie', a.list(h).fuse(c));
-			});
-			cookie.tid = (function(req,m,fn){
+			};
+			cookie.tid = function(req,m,fn){
 				if(fn){
 					if(req.mid){
 						return fn(true);
@@ -506,7 +527,7 @@ module.exports=require('theory')((function(){
 					}
 					return req.cookies;
 				}
-			});
+			};
 			return cookie;
 		})();
 		web.node = (function(){
@@ -546,8 +567,9 @@ module.exports=require('theory')((function(){
 			return node;
 		})();
 		web.run = (function(){
-			function run($){
+			function run($,opt){
 				if(!$){ return web }
+				opt = opt || {};
 				if(!a.list.is($)){
 					$ = [$];
 				} a.list($).each(function(v,i,t){
@@ -557,6 +579,7 @@ module.exports=require('theory')((function(){
 					run.it({
 						file:p
 						,reply: web.state.msg
+						,invincible: opt.invincible
 					},function(v){ });
 				});
 				return web;
@@ -565,7 +588,7 @@ module.exports=require('theory')((function(){
 				, fork = a.child_process.fork;
 			run.on = {};
 			run.res = {};
-			run.it = (function(m,fn){
+			run.it = function(m,fn){
 				if(!m){ return }
 				var opt = m.what || m
 					, way = opt.way = web.state.way(opt.file);
@@ -577,7 +600,7 @@ module.exports=require('theory')((function(){
 					if(a(run.on,way+'.meta.state')){ return fn(true) } // change API
 					return fn(false);
 				}
-				console.log("RUN :-->"+" testing "+opt.file)
+				console.log("RUN :-->"+" testing "+opt.file);
 				var ts = a.time.is()
 					, p = fork(opt.file,[],{env:process.env})
 					, gear = run.on[way] || (run.on[way]={meta:{},cogs:{}})
@@ -595,7 +618,7 @@ module.exports=require('theory')((function(){
 						}
 						web.state.ways.push(a(m,'mod.state'));
 						web.state.ways.sort(web.state.sort);
-						opt.invincible = gear.meta.invincible
+						opt.invincible = gear.meta.invincible;
 						run.track(opt,opt.reply);
 						fn(p.pid||true); fn = function(){};
 						return;
@@ -623,9 +646,9 @@ module.exports=require('theory')((function(){
 				opt.impatient = a.time.wait(function(){
 					fn(false); fn = function(){};
 				},web.opt.run.impatient);
-			});
+			};
 			run.tracked = {};
-			run.track = (function(opt,cb){ // depreciate
+			run.track = function(opt,cb){ // depreciate
 				if(run.tracked[opt.way||opt.file]){ return }
 				fs.watchFile(opt.file,function(c,o){
 					opt.respawn = true;
@@ -642,55 +665,29 @@ module.exports=require('theory')((function(){
 					}),cb);
 				});
 				run.tracked[opt.way||opt.file] = true;
-			});
-			run.to = (function(way){ // TODO: Use different algorithm? Such as oldest-used first.
+			};
+			run.to = function(way){ // TODO: Use different algorithm? Such as oldest-used first.
 				var low;
 				a.obj(a(run.on,way+'.cogs')).each(function(v,i){
 					low = (!v.end && v.count < (low||(low=v)).count)? v : low;
 				});
 				return low||{};
-			});
+			};
+			run.send = function(m,way,g){
+				if(!m){ return }
+				way = way || a(m,'how.way')||a(m,'way')||'';
+				g = g || web.run.on[way].meta;
+				if(g.fatal){ return }
+				var to = web.run.to(way);
+				if(way !== g.name && m && m.how && m.how.way){
+					m.how.way = m.how.way.replace(way, g.name);
+				}
+				to.com && to.com.send && to.com.send(m);
+				to.count++;
+			};
 			return run;
 		})();
-		web.event = (function(){
-			function event(e){
-				if(e){
-					e.on = event.on;
-					e.off = event.off;
-					e.emit = event.emit;
-					return e;
-				} return event;
-			}
-			event.w = event.w||{};
-			event.emit = (function(w,m){
-				a.obj(event.w[w]||{}).each(function(c,i){
-					if(c(m) === null){
-						delete event.w[i];
-					}
-				});
-				return event.w[w];
-			});
-			event.on = (function(w,c){
-				if(!w) return {};
-				var r = a.time.now();
-				(event.w[w]||(event.w[w]={}))[r] = c;
-				return r;
-			});
-			event.off = (function(w){
-				if(event.w[w]){
-					delete event.w[w];
-				} else {
-					a.obj(event.w).each(function(v,i){
-						delete v[w];
-						if(a.obj.empty(v)){
-							delete event.w[i];
-						}
-					});
-				}
-			});
-			return event;
-		})();
-		web.theorize = (function(req,res){
+		web.theorize = function(req,res){
 			if(req){
 				if(a.text.low(web.state.way(req.url.pathname)) === theory.name){
 					req.cookies = web.cookie.tid(req);
@@ -715,8 +712,8 @@ module.exports=require('theory')((function(){
 					+"');");
 				}
 			}
-		});
+		};
 		return a.web = web;
-	});
+	};
 	return web;
 })());
