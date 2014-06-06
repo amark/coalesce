@@ -12,7 +12,7 @@ module.exports=require('theory')((function(){
 		,'child_process'
 	];
 	web.init = function(a){
-		console.log("THIS IS NOT A STABLE VERSION OF COALESCE, USE A STABLE VERSION (v0.1.8)!!!! fox");
+		console.log("THIS IS NOT A STABLE VERSION OF COALESCE, USE A STABLE VERSION (v0.1.7)!!!! fox");
 		function web(opt){
 			return web.configure(opt);
 		} var fs = a.fs
@@ -486,6 +486,7 @@ module.exports=require('theory')((function(){
 						if(s = cookie.tryst[m.who.tid]){
 							web.state.con.s[req.tid = m.who.tid] = req;
 							req.sid = m.who.sid = s.sid;
+							/* THIS MAY BE CAUSING PROBLEMS!! But it looks different from 1.8 */
 							if((w = a.text(m.how.way).clip('.',0,1)) && (ws=a(web.run.on,w+'.meta.stream.on'))){
 								var n = a.com.meta({what:s,who:m.who,how:{way:(w+='.'+ws),web:'stream'},where:{pid:0}});
 								n.what.data = m.what;
