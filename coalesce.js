@@ -1,4 +1,4 @@
-module.exports=require('theory')((function(){
+﻿module.exports=require('theory')((function(){
 	var web = {};
 	web.name = 'web';
 	web.version = 1.9;
@@ -12,7 +12,7 @@ module.exports=require('theory')((function(){
 		,'child_process'
 	];
 	web.init = function(a){
-		console.log("THIS IS NOT A STABLE VERSION OF COALESCE, USE A STABLE VERSION (v0.1.7)!!!! fox");
+		console.log("THIS IS NOT A STABLE VERSION OF COALESCE, USE A STABLE VERSION (v0.1.7)!!!! panther");
 		function web(opt){
 			return web.configure(opt);
 		} var fs = a.fs
@@ -84,7 +84,7 @@ module.exports=require('theory')((function(){
 					if(state.sent(res)){ return }
 					res.end();
 				});
-				state.on.listen(web.opt.port, web.opt.host);
+				state.on.listen(web.opt.port, (web.opt.host === 'localhost'? undefined : web.opt.host)); // Apparently calling with localhost is too strict!
 				state.com.on('connection',state.con);
 				state.com.installHandlers(state.on,web.opt.com);
 				if(web.opt.node && web.opt.node.src){
@@ -336,6 +336,7 @@ module.exports=require('theory')((function(){
 				});
 			};
 			state.sub = function(m,way,con){
+				console
 				if(!a.obj.is(m) || !a.obj.is(m.where) || m.where.at) return;
 				if(m.who.tid){
 					con = con || state.con.s[m.who.tid];
@@ -357,6 +358,7 @@ module.exports=require('theory')((function(){
 					if(!con.hear[where]){ return }
 					con.hear[where].off();
 					delete con.hear[where];
+					console.log("Calling off", where, con.id);
 					return;
 				}
 				if(con.hear[where]){ return }
@@ -386,10 +388,10 @@ module.exports=require('theory')((function(){
 						state.msg(m);
 					});
 				});
-				con.on('close',function(m){
+				con.on('close',function(m){ // TODO: Need to create an event for this in the module routes, same as I've done for on and msg.
 					console.log(con.id+" disconnected.");
 					a.obj(con.hear).each(function(v,i){
-						web.event.off(v);
+						v.off();
 					});
 					delete state.con.s[con.id];
 					if(con.mid){
