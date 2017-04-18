@@ -48,14 +48,14 @@ Now load <http://localhost:8888/play/hello.html> in 2 windows, side by side, the
 
 Curiosity perked? Check out the two test apps in the playground by simply navigating to them in your browser. Or, read on. Here are some quick hints at why it is awesome (skip this to continue to code examples).
 
-##Summary of Thoughts##
+## Summary of Thoughts ##
 1. Your module is automatically available to be asynchronously required anywhere else, node or browser - allowing you to manage your dependencies in your JS and not the HTML.
 2. Your modules get magically deployed and initialized when a browser requests them, or if otherwise specified in a startup configuration.
 3. Your module can optionally receive the request and provide a response, even though it runs in a separate process, already distributed and in parallel. Same setup for multiple machines when connected.
 4. Your module's primary communication practically runs off of function calls, even if it is across systems or multiple systems. Module to module communication is easy, loosely coupled directly to their functions.
 5. Not opinionated, works whether your code only wants to be RESTful, or only a thick client with sockets, or entirely P2P being relayed through the server.
 
-###...continued code examples###
+### ...continued code examples ###
 But then you are like, "yo, where is my $?" and I reply "I ain't your sugar daddy, foo'." so you then:
 ```
 module.exports = require('theory')
@@ -129,7 +129,7 @@ module.exports = require('theory')
 Now when you refresh <http://localhost:8888/play/hello.html> you should see your Node console print out the message that had been sent from the browser.
 There are several things to learn from this.
 
-###Conclusion###
+### Conclusion ###
 1. Coalesce should have automatically roll reloaded (since hot reloading is dangerous) your server side hello.js for you without needing to restart Coalesce.
 2. Your module is exported and available on both client and server via `theory.hello` namespace, which is a function that takes the parameter `m` for 'message'.
 3. Your single file app should be running on both the server and the client, by using the globally available `root.node` and `root.page` we can determine the corresponding logic.
